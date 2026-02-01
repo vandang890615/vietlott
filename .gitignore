@@ -161,3 +161,18 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 .ruff_cache
+
+# Project specific
+test_*.py
+test_*.txt
+*_OLD.py
+*.bak
+
+# Data files (chứa kết quả thật, không nên public)
+data/audit_log.json
+data/*.jsonl
+
+# Model checkpoints
+*.h5
+*.keras
+models/
