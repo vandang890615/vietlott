@@ -1,160 +1,347 @@
-# Vietlot
-auto crawl lottery data from [vietlott](https://vietlott.vn) daily, and predict tickets - it's a copy from [here](https://github.com/vietvudanh/vietlott-data)
-## Predictions (just for testing, not a financial advice)
-### random 10 tickets of power 6/55
+# 🎰 Vietlott AI Predictor Pro
 
-strategy 1:
-| date   | result   | predicted   |
-|--------|----------|-------------|
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://www.tensorflow.org/)
 
-strategy 2:
-|   # | Tickets                 |
-|----:|:------------------------|
-|   1 | [1, 25, 29, 37, 40, 54] |
-|   2 | [4, 7, 8, 12, 23, 31]   |
+> 🤖 **AI-Powered Vietnamese Lottery Prediction System** sử dụng LSTM Deep Learning để phân tích và dự đoán kết quả xổ số Vietlott.
 
-strategy 3:
-|   # | Tickets                 |
-|----:|:------------------------|
-|   1 | [4, 10, 19, 27, 46, 53] |
-|   2 | [5, 13, 30, 46, 50, 53] |
-|   3 | [3, 8, 32, 40, 44, 52]  |
-|   4 | [3, 11, 15, 34, 49, 53] |
-|   5 | [4, 24, 39, 44, 48, 53] |
-|   6 | [8, 18, 23, 40, 44, 51] |
-|   7 | [7, 35, 40, 43, 46, 53] |
-|   8 | [9, 19, 31, 36, 44, 50] |
-|   9 | [3, 7, 30, 37, 45, 49]  |
-|  10 | [4, 9, 21, 35, 40, 51]  |
+![Version](https://img.shields.io/badge/version-11.2-green.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
 
-## top 20 details power 6/55
-| date       |    id | result                   |
-|:-----------|------:|:-------------------------|
-| 2026-01-24 | 01299 | [14, 24, 25, 30, 35, 53] |
-| 2026-01-22 | 01298 | [2, 20, 21, 29, 36, 50]  |
-| 2026-01-20 | 01297 | [4, 20, 26, 28, 37, 41]  |
-| 2026-01-17 | 01296 | [14, 21, 23, 25, 46, 48] |
-| 2026-01-15 | 01295 | [13, 21, 31, 34, 48, 55] |
-| 2026-01-13 | 01294 | [3, 12, 25, 51, 52, 55]  |
-| 2026-01-10 | 01293 | [9, 16, 30, 33, 34, 38]  |
-| 2026-01-08 | 01292 | [20, 22, 36, 43, 45, 50] |
-| 2026-01-06 | 01291 | [22, 28, 29, 30, 34, 47] |
-| 2026-01-03 | 01290 | [10, 16, 17, 23, 33, 36] |
-| 2026-01-01 | 01289 | [5, 16, 29, 33, 39, 42]  |
-| 2025-12-30 | 01288 | [11, 30, 35, 41, 48, 55] |
-| 2025-12-27 | 01287 | [16, 21, 30, 37, 39, 40] |
-| 2025-12-25 | 01286 | [4, 6, 32, 37, 40, 48]   |
-| 2025-12-23 | 01285 | [2, 10, 16, 25, 32, 38]  |
-| 2025-12-20 | 01284 | [22, 32, 33, 35, 40, 41] |
-| 2025-12-18 | 01283 | [12, 14, 29, 30, 39, 55] |
-| 2025-12-16 | 01282 | [7, 36, 37, 38, 52, 55]  |
-| 2025-12-13 | 01281 | [5, 8, 12, 18, 20, 38]   |
-| 2025-12-11 | 01280 | [9, 13, 21, 45, 48, 55]  |
+---
 
-### random 10 tickets of power 6/45
+## 📌 Tổng quan
 
-strategy 1:
-|   # | Tickets                  |
-|----:|:-------------------------|
-|   1 | [1, 2, 8, 13, 26, 34]    |
-|   2 | [10, 24, 25, 26, 30, 41] |
+**Vietlott AI Predictor Pro** là ứng dụng GUI desktop được xây dựng bằng Python, tích hợp:
+- 🧠 **LSTM Neural Network** cho dự đoán thông minh
+- 🌐 **Tự động crawl dữ liệu** từ vietlott.vn
+- 🔍 **Audit system** để đánh giá độ chính xác
+- 📊 **Giao diện trực quan** với Tkinter
 
-strategy 2:
-|   # | Tickets                  |
-|----:|:-------------------------|
-|   1 | [3, 7, 24, 29, 40, 44]   |
-|   2 | [11, 22, 26, 37, 41, 44] |
-|   3 | [3, 7, 25, 29, 39, 44]   |
-|   4 | [11, 22, 26, 37, 41, 44] |
-|   5 | [6, 12, 22, 26, 33, 42]  |
-|   6 | [4, 16, 19, 28, 41, 44]  |
-|   7 | [2, 5, 9, 26, 29, 42]    |
-|   8 | [5, 28, 31, 37, 41, 44]  |
-|   9 | [3, 8, 22, 25, 33, 36]   |
-|  10 | [9, 18, 31, 35, 38, 44]  |
+### ⚠️ Disclaimer
+> **LƯU Ý QUAN TRỌNG:** Đây là dự án **NGHIÊN CỨU VÀ HỌC TẬP**. Xổ số là trò chơi may rủi hoàn toàn ngẫu nhiên. Không có AI nào có thể dự đoán chính xác 100%. Chúng tôi không khuyến khích việc cờ bạc. Vui lòng chơi có trách nhiệm.
 
-## top 20 details power 6/45
-| date       |    id | result                   |
-|:-----------|------:|:-------------------------|
-| 2026-01-23 | 01462 | [9, 15, 16, 20, 22, 31]  |
-| 2026-01-21 | 01461 | [1, 18, 23, 24, 29, 37]  |
-| 2026-01-18 | 01460 | [2, 5, 15, 26, 39, 42]   |
-| 2026-01-16 | 01459 | [2, 10, 21, 31, 34, 40]  |
-| 2026-01-14 | 01458 | [1, 22, 23, 28, 39, 45]  |
-| 2026-01-11 | 01457 | [8, 10, 21, 25, 31, 38]  |
-| 2026-01-09 | 01456 | [8, 9, 17, 21, 36, 45]   |
-| 2026-01-07 | 01455 | [1, 5, 7, 28, 31, 43]    |
-| 2026-01-04 | 01454 | [2, 12, 21, 29, 35, 44]  |
-| 2026-01-02 | 01453 | [7, 18, 22, 32, 37, 38]  |
-| 2025-12-31 | 01452 | [1, 25, 35, 36, 37, 45]  |
-| 2025-12-28 | 01451 | [1, 2, 7, 16, 31, 37]    |
-| 2025-12-26 | 01450 | [4, 6, 16, 25, 27, 40]   |
-| 2025-12-24 | 01449 | [15, 19, 31, 35, 43, 45] |
-| 2025-12-21 | 01448 | [6, 9, 12, 18, 29, 43]   |
-| 2025-12-19 | 01447 | [1, 21, 36, 42, 43, 44]  |
-| 2025-12-17 | 01446 | [5, 14, 24, 38, 41, 43]  |
-| 2025-12-14 | 01445 | [8, 11, 13, 16, 28, 32]  |
-| 2025-12-12 | 01444 | [3, 7, 13, 17, 38, 44]   |
-| 2025-12-10 | 01443 | [7, 18, 22, 29, 30, 36]  |
+---
 
-<!---
-stats 6/55 all time - stats.to_markdown(index=False)
-stats 6/55 -15d - stats_15d.to_markdown(index=False)
-stats 6/55 -30d - stats_30d.to_markdown(index=False)
-stats 6/55 -60d - stats_60d.to_markdown(index=False)
-stats 6/55 -90d - stats_90d.to_markdown(index=False)
--->
+## ✨ Tính năng
 
-# Install
- 
-## run locally
+### 🎯 Chức năng chính:
+- ✅ **Dự đoán AI:** Sử dụng LSTM để tạo 10 bộ số dự đoán cho mỗi kỳ quay
+- ✅ **Auto-crawl:** Tự động lấy kết quả mới nhất từ vietlott.vn
+- ✅ **Audit System:** Tự động kiểm tra và đánh giá kết quả dự đoán
+- ✅ **Lịch sử:** Lưu trữ và hiển thị toàn bộ lịch sử dự đoán
+- ✅ **Countdown Timer:** Đếm ngược thời gian đến kỳ quay tiếp theo
 
-```shell
-# add PATH C:\Users\win\.pyenv\pyenv-win\versions\3.11.4\Scripts\
-$ pip install -r requirements.txt
-$ python src/vietlott/cli/crawl.py power_655
-$ python src/vietlott/cli/missing.py power_655
-$ python src/render_readme.py
-$ python src/vietlott/predictor/predictor.py
-$ python src/vietlott/predictor/predictor2.py
-```
- 
-## via pip
+### 🎮 Hỗ trợ:
+- 🔴 **Mega 6/45** (Thứ 3, 5, 7)
+- 🟠 **Power 6/55** (Thứ 2, 4, 6)
 
-```shell
-pip install -i https://test.pypi.org/simple/ vietlott-data==0.1.2
+### 🆕 Phiên bản mới (v11.2):
+- ✅ Giao diện tích hợp 2 nút: "Cập nhật kết quả" và "Kiểm tra dự đoán"
+- ✅ Popup thông báo rõ ràng cho mọi hành động
+- ✅ Xử lý lỗi chi tiết với messagebox
+- ✅ Hiển thị tiến trình training AI real-time
+
+---
+
+## 🚀 Cài đặt
+
+### Yêu cầu hệ thống:
+- **Python:** 3.11 hoặc 3.12
+- **OS:** Windows 10/11 (hỗ trợ tốt nhất)
+- **RAM:** Tối thiểu 4GB
+- **Internet:** Cần kết nối để crawl dữ liệu
+
+### Bước 1: Clone repository
+```bash
+git clone https://github.com/YOUR_USERNAME/thanhnhu-vietlott.git
+cd thanhnhu-vietlott
 ```
 
-## cli
-project provides two cli
+### Bước 2: Tạo virtual environment (khuyến nghị)
+```bash
+python -m venv .venv
 
-### crawl
-```shell
-Usage: vietlott-crawl [OPTIONS] PRODUCT
+# Windows
+.venv\Scripts\activate
 
-  crawl a product with a given run date or from/to index page :param ctx:
-  :param product: :param run_date: :param index_from: :param index_to:
-  :return:
-
-Options:
-  --run-date TEXT
-  --index_from INTEGER  page index from run since we crawl by pagination the
-                        pages
-  --index_to INTEGER    page index from run since we crawl by pagination the
-                        pages
-  --help                Show this message and exit.
+# Linux/Mac
+source .venv/bin/activate
 ```
 
-### Backfill missing data
-
-```shell
-Usage: vietlott-missing [OPTIONS] PRODUCT
-
-  detect_missing_data and run if needed :param ctx: context :param product:
-  product to run :param limit: number of pages to run :return:
-
-Options:
-  --limit INTEGER
-  --help           Show this message and exit.
+### Bước 3: Cài đặt dependencies
+```bash
+pip install -r requirements.txt
 ```
 
+**Dependencies chính:**
+- `tensorflow` - LSTM neural network
+- `pandas` - Data processing
+- `scikit-learn` - Machine learning utilities
+- `beautifulsoup4` - Web crawling
+- `requests` - HTTP requests
+- `tkinter` - GUI (built-in với Python)
+
+---
+
+## 🎮 Sử dụng
+
+### Cách 1: Sử dụng file batch (Windows - Đơn giản nhất)
+```bash
+# Mở phần mềm
+double-click: MO_PHAN_MEM.bat
+
+# Cập nhật dữ liệu (sau mỗi kỳ quay)
+double-click: CAP_NHAT_DU_LIEU.bat
+
+# Khởi động lại (nếu cần)
+double-click: KHOI_DONG_LAI.bat
+```
+
+### Cách 2: Command line
+```bash
+# Set PYTHONPATH
+set PYTHONPATH=src;src/vietlott/predictor  # Windows
+export PYTHONPATH=src:src/vietlott/predictor  # Linux/Mac
+
+# Chạy GUI
+python src/vietlott/predictor/gui_app.py
+
+# Hoặc crawl thủ công
+python src/vietlott/cli/crawl.py power_655 --index_to 2
+python src/vietlott/cli/crawl.py power_645 --index_to 2
+```
+
+---
+
+## 📖 Hướng dẫn sử dụng
+
+### 1️⃣ Giao diện chính
+
+```
+┌─────────────┬─────────────────┬─────────────┐
+│  MEGA 6/45  │  KẾT QUẢ MỚI    │  POWER 6/55 │
+│             │     NHẤT        │             │
+│ [SOI CẦU]   │  [🌐] [🔍]     │ [SOI CẦU]   │
+│             │                 │             │
+│ Dự đoán     │  Hiển thị       │ Dự đoán     │
+│ + Lịch sử   │  kết quả        │ + Lịch sử   │
+└─────────────┴─────────────────┴─────────────┘
+```
+
+### 2️⃣ Quy trình sử dụng hàng ngày
+
+**Sau mỗi kỳ quay (18h30):**
+1. Nhấn **"🌐 CẬP NHẬT KẾT QUẢ MỚI"** (đợi 30-60s)
+2. Nhấn **"🔍 KIỂM TRA DỰ ĐOÁN"** (đợi 5s)
+3. Xem kết quả trong "Lịch sử dự báo"
+
+**Trước khi quay số (trước 18h30):**
+1. Nhấn **"🔥 SOI CẦU MỚI"** (đợi ~30s training AI)
+2. Xem 10 bộ số dự đoán được tạo
+
+### 3️⃣ Lịch quay số
+
+| Loại xổ số | Ngày quay | Giờ quay |
+|------------|-----------|----------|
+| **Mega 6/45** | Thứ 3, 5, 7 | 18:30 |
+| **Power 6/55** | Thứ 2, 4, 6 | 18:30 |
+
+---
+
+## 🏗️ Kiến trúc
+
+### Cấu trúc dự án:
+```
+thanhnhu-vietlott/
+├── src/
+│   └── vietlott/
+│       ├── cli/              # Command-line tools
+│       │   ├── crawl.py      # Web crawler
+│       │   └── missing.py    # Backfill missing data
+│       ├── config/           # Configuration
+│       ├── crawler/          # Crawler logic
+│       └── predictor/
+│           ├── gui_app.py    # 🔥 Main GUI application
+│           ├── lstm_predictor.py  # LSTM model
+│           └── web_app.py    # Flask web interface (experimental)
+├── data/                     # Data storage (gitignored)
+│   ├── power645.jsonl        # Mega 6/45 results
+│   ├── power655.jsonl        # Power 6/55 results
+│   └── audit_log.json        # Prediction audit log
+├── *.bat                     # Windows batch scripts
+├── requirements.txt          # Python dependencies
+└── README.md                 # This file
+```
+
+### Luồng dữ liệu:
+```
+vietlott.vn
+     ↓ (crawl.py)
+  data/*.jsonl
+     ↓ (lstm_predictor.py)
+   LSTM Model
+     ↓ (train 15 epochs)
+ 10 Predictions
+     ↓ (log_predictions)
+audit_log.json
+     ↓ (check_audit_log)
+  Win/Loss Analysis
+```
+
+---
+
+## 🤖 Công nghệ
+
+### Machine Learning:
+- **Model:** LSTM (Long Short-Term Memory)
+- **Framework:** TensorFlow 2.x
+- **Input:** 15 kỳ quay gần nhất
+- **Output:** 10 bộ số dự đoán (6 số mỗi bộ)
+- **Training:** 15 epochs mỗi lần soi cầu
+
+### Data Processing:
+- **Pandas:** Data manipulation và analysis
+- **NumPy:** Numerical computations
+- **Scikit-learn:** Data preprocessing
+
+### GUI:
+- **Tkinter:** Cross-platform GUI toolkit
+- **Threading:** Async operations để giữ UI responsive
+
+---
+
+## 📊 Dataset
+
+Dữ liệu được crawl tự động từ [vietlott.vn](https://vietlott.vn):
+- **Format:** JSONL (JSON Lines)
+- **Fields:** `date`, `id`, `result`, `page`, `process_time`
+- **Update frequency:** Manual (sau mỗi kỳ quay)
+
+**Ví dụ:**
+```json
+{"date":"2026-02-01","id":"01466","result":[1,18,21,23,30,36],"page":0,"process_time":"2026-02-01 19:00:00"}
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Lỗi thường gặp:
+
+#### 1. "ModuleNotFoundError: No module named 'tensorflow'"
+```bash
+pip install tensorflow
+```
+
+#### 2. Nút "Soi cầu" không phản hồi
+- **Nguyên nhân:** Training AI mất ~30 giây
+- **Giải pháp:** Đợi thêm, xem status bar
+
+#### 3. "No results" khi crawl
+- **Nguyên nhân:** Website chưa cập nhật kết quả mới
+- **Giải pháp:** Đợi sau 19h00 rồi thử lại
+
+#### 4. Crash khi training
+- **Nguyên nhân:** Thiếu RAM hoặc data bị lỗi
+- **Giải pháp:** 
+  ```bash
+  # Cập nhật lại data
+  python src/vietlott/cli/crawl.py power_655 --index_to 5
+  ```
+
+**Xem thêm:** [KHAC_PHUC_LOI.md](KHAC_PHUC_LOI.md)
+
+---
+
+## 📝 Changelog
+
+### v11.2 (2026-02-01)
+- ✅ FIX: Sửa lỗi "im lìm" khi nhấn nút soi cầu
+- ✅ ADD: Popup thông báo cho mọi hành động
+- ✅ IMPROVE: Hiển thị tiến trình training chi tiết
+- ✅ IMPROVE: Error handling với messagebox
+
+### v11.1 (2026-02-01)
+- ✅ FIX: Sửa logic kiểm tra audit (checked=true → cho phép soi mới)
+- ✅ ADD: Timeout 30s cho crawler
+- ✅ IMPROVE: Thông báo lỗi chi tiết
+
+### v11.0 (2026-02-01)
+- ✅ ADD: 2 nút mới trong GUI: "Cập nhật" và "Kiểm tra"
+- ✅ REMOVE: Không cần chạy file .bat nữa
+
+**Xem chi tiết:** [SUA_LOI_v11.1.md](SUA_LOI_v11.1.md), [SUA_LOI_IM_LIM_v11.2.md](SUA_LOI_IM_LIM_v11.2.md)
+
+---
+
+## 🤝 Đóng góp
+
+Chúng tôi hoan nghênh mọi đóng góp! Vui lòng:
+
+1. Fork repository này
+2. Tạo branch mới (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Mở Pull Request
+
+### Coding style:
+- **Python:** PEP 8
+- **Docstrings:** Google style
+- **Type hints:** Khuyến khích sử dụng
+
+---
+
+## 📄 License
+
+Dự án này được phân phối dưới **MIT License**. Xem file [LICENSE](LICENSE) để biết thêm chi tiết.
+
+**TL;DR:**
+- ✅ Sử dụng tự do cho mục đích cá nhân
+- ✅ Sửa đổi và phân phối lại
+- ✅ Sử dụng thương mại
+- ⚠️ Phải giữ lại thông tin license gốc
+- ❌ Không có bảo hành
+
+---
+
+## 👨‍💻 Tác giả
+
+**ThanhNhu** 
+- GitHub: [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
+- Email: your.email@example.com
+
+---
+
+## 🙏 Credits
+
+### Dữ liệu:
+- [Vietlott](https://vietlott.vn) - Nguồn dữ liệu kết quả xổ số
+
+### Thư viện:
+- [TensorFlow](https://www.tensorflow.org/) - Deep learning framework
+- [Pandas](https://pandas.pydata.org/) - Data analysis
+- [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/) - Web scraping
+
+---
+
+## ⭐ Support
+
+Nếu bạn thấy dự án này hữu ích, hãy cho một ⭐️ trên GitHub!
+
+---
+
+## 📞 Liên hệ
+
+Có câu hỏi hoặc đề xuất? Tạo [Issue](https://github.com/YOUR_USERNAME/thanhnhu-vietlott/issues) hoặc liên hệ qua email.
+
+---
+
+<div align="center">
+
+**Made with ❤️ in Vietnam 🇻🇳**
+
+*Chơi có trách nhiệm - Không quá liều lĩnh*
+
+</div>
