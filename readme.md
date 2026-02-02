@@ -116,6 +116,18 @@ graph TD
 
 ---
 
+
+---
+
+## 📄 LICENSE
+
+Dự án này được phân phối dưới hình thức mã nguồn mở theo giấy phép **MIT License**. Bạn có quyền tự do:
+*   ✅ **Sử dụng**: Cho phép sử dụng phần mềm cho mục đích cá nhân hoặc thương mại.
+*   ✅ **Chỉnh sửa**: Có toàn quyền sửa đổi mã nguồn theo nhu cầu riêng.
+*   ✅ **Phân phối**: Được phép chia sẻ và phát hành lại mã nguồn.
+
+*Xem chi tiết tại file [LICENSE](LICENSE).*
+
 <div align="center">
 
 **Developed with ❤️ by VanDang**
