@@ -2,6 +2,21 @@
 
 ![Vietlott Title](docs/title.svg)
 
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-orange?style=for-the-badge&logo=tensorflow&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-2.2-150458?style=for-the-badge&logo=pandas&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-1.26-013243?style=for-the-badge&logo=numpy&logoColor=white)
+![Scikit-Learn](https://img.shields.io/badge/Scikit_Learn-1.4-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![JSON](https://img.shields.io/badge/Data-JSONL-black?style=for-the-badge&logo=json&logoColor=white)
+![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white)
+![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&logo=mit)
+</div>
+
 **HỆ THỐNG DỰ ĐOÁN XỔ SỐ THÔNG MINH SỬ DỤNG MẠNG NERON & PHÂN TÍCH THỐNG KÊ**
 
 [DỰ ÁN](#-giới-thiệu) • [TÍNH NĂNG](#-tính-năng-đột-phá) • [CÀI ĐẶT](#-hướng-dẫn-cài-đặt) • [KIẾN TRÚC](#-kiến-trúc-hệ-thống)
