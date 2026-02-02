@@ -2,70 +2,77 @@
 
 <div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-orange?style=for-the-badge&logo=tensorflow&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Stable-green?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-11.5_PRO-green?style=for-the-badge&logo=appveyor)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-orange?style=for-the-badge&logo=tensorflow)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge)
 
-**HỆ THỐNG DỰ ĐOÁN XỔ SỐ KHOA HỌC DỮ LIỆU & DEEP LEARNING**
+**HỆ THỐNG DỰ ĐOÁN XỔ SỐ THÔNG MINH SỬ DỤNG MẠNG NERON & PHÂN TÍCH THỐNG KÊ**
 
-[TÍNH NĂNG](#-tính-năng-nổi- bật) • [CÀI ĐẶT](#-cài-đặt-nhanh) • [NGUYÊN LÝ](#-kiến-trúc-hệ-thống)
+[TÍNH NĂNG](#-tính-năng-nổi-bật) • [CÀI ĐẶT](#-cài-đặt-nhanh) • [NGUYÊN LÝ](#-nguyên-lý-hoạt-động)
 
 </div>
 
 ---
 
-## 🔥 GIỚI THIỆU
+## 🚀 GIỚI THIỆU
 
-> **"Dữ liệu không biết nói dối."**
+> **"Dữ liệu không biết nói dối nếu chúng ta biết cách lắng nghe."**
 
-**Vietlott AI Predictor Pro** (v11.5) là dự án **Data Science** chuyên sâu, áp dụng các mô hình học sâu (Deep Learning) hiện đại nhất để giải mã các quy luật thống kê của xổ số Vietlott.
+**Vietlott AI Predictor Pro** không chỉ là một công cụ soi cầu thông thường. Đây là một hệ thống **nghiên cứu khoa học dữ liệu (Data Science)** áp dụng các mô hình học sâu (Deep Learning) tiên tiến nhất để tìm kiếm các quy luật ẩn sau những con số tưởng chừng như ngẫu nhiên.
 
-Không dùng tâm linh, không đoán mò. Chúng tôi sử dụng **Toán học** và **Mạng Neron Nhân tạo** để tìm ra cơ hội chiến thắng cao nhất.
+Sự kết hợp giữa **LSTM (Long Short-Term Memory)**, **Transformer (Attention Mechanism)** và **Reverse Engineering Strategy** mang lại cái nhìn hoàn toàn mới về xác suất trúng thưởng.
 
 ---
 
-## 🚀 TÍNH NĂNG NỔI BẬT
+## 🌟 TÍNH NĂNG NỔI BẬT
 
-### 🧠 1. Deep Learning Core
-- **LSTM (Long Short-Term Memory)**: Mạng neron có khả năng "nhớ" chuỗi lịch sử dài hạn, chuyên dùng để dự báo chuỗi thời gian.
-- **Transformer (Attention Mechanism)**: Công nghệ giúp mô hình tập trung vào các kỳ quay quan trọng nhất.
+### 🧠 1. Deep Learning Core (Lõi AI)
+*   **LSTM Neural Network**: Mạng neron hồi quy giúp ghi nhớ chuỗi lịch sử dài hạn, phát hiện xu hướng lặp lại và sự biến thiên của các bộ số qua hàng ngàn kỳ quay.
+*   **Transformer Model**: Sử dụng cơ chế Attention (tương tự công nghệ của ChatGPT) để tìm ra mối liên hệ phức tạp giữa các kỳ quay xa nhau mà mắt thường không thể nhận ra.
 
-### 🕵️ 2. Chiến lược Phân tích ngược
-- **Kiểm định Chi-Square**: Xác định độ ngẫu nhiên của lồng cầu.
-- **Phát hiện Bất thường**: Tìm ra các dấu hiệu lạ trong phân bố kết quả.
-- **Lọc số thông minh**: Tự động loại bỏ >90% các bộ số có xác suất trúng thấp.
+### 🔍 2. Advanced Reverse Engineering (Phân tích ngược)
+*   **Kiểm định tính ngẫu nhiên (Randomness Test)**: Sử dụng thuật toán Chi-Square và Autocorrelation để phân tích độ tin cậy của dữ liệu đầu vào.
+*   **Phát hiện quy luật ẩn**: Tìm kiếm các khuôn mẫu như Position Bias (Thiên vị vị trí), Sum Control (Kiểm soát tổng), và Cold Numbers (Số gan).
+*   **Smart Filter Strategy**: Thay vì đoán mò, hệ thống sử dụng bộ lọc thông minh để loại bỏ hàng triệu bộ số có xác suất cực thấp, chỉ giữ lại các bộ số nằm trong "vùng nóng" thống kê.
 
-### 🖥️ 3. Giao diện Chuyên nghiệp
-- **Dark Mode**: Giao diện tối hiện đại, chuyên nghiệp.
-- **Real-time Audit**: Tự động kiểm tra kết quả ngay khi có kỳ quay mới.
-- **Tiện lợi**: Thao tác Soi cầu, Cập nhật chỉ với 1 cú click.
+### 🛡️ 3. Hệ thống Audit & Minh bạch
+*   **Tự động đối soát**: Ngay khi có kết quả mới, hệ thống sẽ tự động so khớp với dự đoán kỳ trước để đánh giá hiệu suất.
+*   **Lịch sử vĩnh viễn**: Mọi dự đoán đều được lưu lại trong `audit_log.json`, đảm bảo tính trung thực (không thể sửa kết quả sau khi đã quay thưởng).
+
+### 🖥️ 4. Professional GUI (Giao diện Chuyên nghiệp)
+*   **Dark Mode**: Thiết kế tối hiện đại, tập trung vào dữ liệu và bảo vệ thị giác.
+*   **Real-time Countdown**: Đếm ngược thời gian thực đến từng giây trước giờ quay thưởng của Mega 6/45 và Power 6/55.
+*   **Xử lý đa luồng (Multi-threading)**: Ứng dụng luôn mượt mà trong khi AI đang thực hiện hàng tỷ phép tính huấn luyện ở nền.
 
 ---
 
 ## 🏗 KIẾN TRÚC HỆ THỐNG
 
+Sơ đồ luồng xử lý dữ liệu (Data Pipeline) từ khi lấy kết quả đến khi đưa ra gợi ý:
+
 ```mermaid
 graph TD
-    A[SERVER] -->|Crawl| B[DATABASE]
-    B -->|Process| C[AI ENGINE]
+    A[🌍 VIETLOTT SERVER] -->|Auto Crawl| B[(🗄️ RAW DATABASE)]
+    B -->|Normalization| C{⚙️ AI ENGINE}
     
-    subgraph AI_Core
-    C --> D[LSTM Model]
-    C --> E[Transformer]
+    subgraph "Deep Learning Engine"
+    C -->|Time Series| D[🧠 LSTM Model]
+    C -->|Attention Map| E[🤖 Transformer]
     end
     
-    subgraph Stats_Core
-    C --> F[Frequency]
-    C --> G[Strategy]
+    subgraph "Statistical Engine"
+    C -->|Frequency| F[📈 Statistical Analysis]
+    C -->|Reverse Engineering| G[🛡️ Rule Filter]
     end
     
-    D --> H[Results]
+    D --> H[Candidate Pool]
     E --> H
     F --> H
-    G --> H
     
-    H --> I[10 TICKETS]
+    H -->|Reduction Strategy| I[✨ 10 GOLDEN TICKETS]
+    G --> I
+    I -->|User Interface| J[🏆 FINAL PREDICTION]
 ```
 
 ---
@@ -73,14 +80,23 @@ graph TD
 ## 🛠 CÀI ĐẶT NHANH
 
 ### Yêu cầu hệ thống
-* **Hệ điều hành**: Windows 10/11
-* **Python**: 3.10 trở lên
-* **RAM**: Tối thiểu 4GB
+*   **OS**: Windows 10/11 (Được tối ưu tốt nhất).
+*   **Python**: Phiên bản 3.10 trở lên.
+*   **RAM**: Tối thiểu 4GB (Khuyến nghị 8GB để huấn luyện mô hình mượt mà).
 
-### Hướng dẫn sử dụng
-1. **Tải mã nguồn về máy**
-2. **Cài đặt thư viện**: `pip install -r requirements.txt`
-3. **Mở phần mềm**: Chạy file `MO_PHAN_MEM.bat`
+### Hướng dẫn 3 bước
+1.  **Tải mã nguồn:**
+    ```bash
+    git clone https://github.com/vandang890615/vietlott.git
+    cd vietlott
+    ```
+2.  **Cài đặt thư viện:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  **Khởi chạy:**
+    *   Chạy file **`MO_PHAN_MEM.bat`** (Click đúp chuột).
+    *   Hoặc lệnh: `python src/vietlott/predictor/gui_app.py`
 
 ---
 
@@ -94,10 +110,14 @@ graph TD
 
 ---
 
-## ⚠️ MIỄN TRỪ TRÁCH NHIỆM
+## ⚠️ MIỄN TRỪ TRÁCH NHIỆM (DISCLAIMER)
 
-> **Dự án này phục vụ mục đích NGHIÊN CỨU & HỌC TẬP.**
-> Xổ số có tính ngẫu nhiên cao. Không có công cụ nào đảm bảo trúng 100%. Hãy chơi có trách nhiệm!
+> **LƯU Ý QUAN TRỌNG**: Dự án này được phát triển với mục đích **NGHIÊN CỨU KHOA HỌC & GIÁO DỤC** về Data Science và Machine Learning.
+> 
+> *   Xổ số Vietlott về bản chất là trò chơi may rủi.
+> *   Không có thuật toán nào đảm bảo chiến thắng 100%.
+> *   Tác giả không chịu trách nhiệm về bất kỳ thiệt hại tài chính nào từ việc sử dụng phần mềm.
+> *   **Vui lòng chơi chừng mực và có trách nhiệm.**
 
 ---
 
