@@ -110,6 +110,17 @@ graph TD
 
 ---
 
+
+---
+
+## 📈 STAR HISTORY
+
+<div align="center">
+
+[![Star History Chart](https://api.star-history.com/svg?repos=vandang890615/vietlott&type=Date)](https://star-history.com/#vandang890615/vietlott&Date)
+
+</div>
+
 <div align="center">
 
 **Developed with ❤️ by VanDang**
