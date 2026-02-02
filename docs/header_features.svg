@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="60" viewBox="0 0 500 60">
+  <text x="0" y="45" font-family="'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#00e5ff">
+    TÍNH NĂNG ĐỘT PHÁ
+  </text>
+  <rect x="0" y="55" width="300" height="3" fill="#00e5ff" rx="1.5"/>
+</svg>

@@ -1,129 +1,45 @@
-# 🎰 VIETLOTT AI PREDICTOR PRO
-
 <div align="center">
 
-![Version](https://img.shields.io/badge/Version-11.5_PRO-green?style=for-the-badge&logo=appveyor)
-![Python](https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-orange?style=for-the-badge&logo=tensorflow)
-![License](https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge)
+![Vietlott Title](docs/title.svg)
 
-**HỆ THỐNG DỰ ĐOÁN XỔ SỐ THÔNG MINH SỬ DỤNG MẠNG NERON & PHÂN TÍCH THỐNG KÊ**
-
-[TÍNH NĂNG](#-tính-năng-nổi-bật) • [CÀI ĐẶT](#-cài-đặt-nhanh) • [NGUYÊN LÝ](#-nguyên-lý-hoạt-động)
+**HỆ THỐNG DỰ ĐOÁN XỔ SỐ HIỆN ĐẠI NHẤT VIỆT NAM**
+*Tích Hợp Deep Learning v11.5 Pro*
 
 </div>
 
 ---
 
-## 🚀 GIỚI THIỆU
+![Features Header](docs/header_features.svg)
 
-> **"Dữ liệu không biết nói dối nếu chúng ta biết cách lắng nghe."**
+### 🧠 Trí Tuệ Nhân Tạo Cao Cấp
+- **LSTM Core**: Mô hình mạng neron hồi quy mạnh mẽ chuyên phân tích chuỗi thời gian xắc suất xổ số.
+- **Transformer Attention**: Công nghệ phân tích ngữ cảnh bậc cao giúp tìm ra mối liên hệ ẩn giữa các con số.
 
-**Vietlott AI Predictor Pro** không chỉ là một công cụ soi cầu thông thường. Đây là một hệ thống **nghiên cứu khoa học dữ liệu (Data Science)** áp dụng các mô hình học sâu (Deep Learning) tiên tiến nhất để tìm kiếm các quy luật ẩn sau những con số tưởng chừng như ngẫu nhiên.
-
-Sự kết hợp giữa **LSTM (Long Short-Term Memory)**, **Transformer (Attention Mechanism)** và **Reverse Engineering Strategy** mang lại cái nhìn hoàn toàn mới về xác suất trúng thưởng.
-
----
-
-## 🌟 TÍNH NĂNG NỔI BẬT
-
-### 🧠 1. Deep Learning Core (Lõi AI)
-*   **LSTM Neural Network**: Mạng neron hồi quy giúp ghi nhớ chuỗi lịch sử dài hạn, phát hiện xu hướng lặp lại và sự biến thiên của các bộ số qua hàng ngàn kỳ quay.
-*   **Transformer Model**: Sử dụng cơ chế Attention (tương tự công nghệ của ChatGPT) để tìm ra mối liên hệ phức tạp giữa các kỳ quay xa nhau mà mắt thường không thể nhận ra.
-
-### 🔍 2. Advanced Reverse Engineering (Phân tích ngược)
-*   **Kiểm định tính ngẫu nhiên (Randomness Test)**: Sử dụng thuật toán Chi-Square và Autocorrelation để phân tích độ tin cậy của dữ liệu đầu vào.
-*   **Phát hiện quy luật ẩn**: Tìm kiếm các khuôn mẫu như Position Bias (Thiên vị vị trí), Sum Control (Kiểm soát tổng), và Cold Numbers (Số gan).
-*   **Smart Filter Strategy**: Thay vì đoán mò, hệ thống sử dụng bộ lọc thông minh để loại bỏ hàng triệu bộ số có xác suất cực thấp, chỉ giữ lại các bộ số nằm trong "vùng nóng" thống kê.
-
-### 🛡️ 3. Hệ thống Audit & Minh bạch
-*   **Tự động đối soát**: Ngay khi có kết quả mới, hệ thống sẽ tự động so khớp với dự đoán kỳ trước để đánh giá hiệu suất.
-*   **Lịch sử vĩnh viễn**: Mọi dự đoán đều được lưu lại trong `audit_log.json`, đảm bảo tính trung thực (không thể sửa kết quả sau khi đã quay thưởng).
-
-### 🖥️ 4. Professional GUI (Giao diện Chuyên nghiệp)
-*   **Dark Mode**: Thiết kế tối hiện đại, tập trung vào dữ liệu và bảo vệ thị giác.
-*   **Real-time Countdown**: Đếm ngược thời gian thực đến từng giây trước giờ quay thưởng của Mega 6/45 và Power 6/55.
-*   **Xử lý đa luồng (Multi-threading)**: Ứng dụng luôn mượt mà trong khi AI đang thực hiện hàng tỷ phép tính huấn luyện ở nền.
+### 🕵️ Phân Tích Ngược (Reverse Engineering)
+- **Randomness Analytics**: Kiểm tra sự trung thực và quy luật của lồng cầu.
+- **Smart Filter Strategy**: Lọc bỏ 90% số rác để tập trung vào điểm tin cậy cao nhất.
 
 ---
 
-## 🏗 KIẾN TRÚC HỆ THỐNG
+![Install Header](docs/header_install.svg)
 
-Sơ đồ luồng xử lý dữ liệu (Data Pipeline) từ khi lấy kết quả đến khi đưa ra gợi ý:
-
-```mermaid
-graph TD
-    A[🌍 VIETLOTT SERVER] -->|Auto Crawl| B[(🗄️ RAW DATABASE)]
-    B -->|Normalization| C{⚙️ AI ENGINE}
-    
-    subgraph "Deep Learning Engine"
-    C -->|Time Series| D[🧠 LSTM Model]
-    C -->|Attention Map| E[🤖 Transformer]
-    end
-    
-    subgraph "Statistical Engine"
-    C -->|Frequency| F[📈 Statistical Analysis]
-    C -->|Reverse Engineering| G[🛡️ Rule Filter]
-    end
-    
-    D --> H[Candidate Pool]
-    E --> H
-    F --> H
-    
-    H -->|Reduction Strategy| I[✨ 10 GOLDEN TICKETS]
-    G --> I
-    I -->|User Interface| J[🏆 FINAL PREDICTION]
-```
+1. **Khởi Chạy**: Chạy file `MO_PHAN_MEM.bat`
+2. **Cập Nhật**: Bấm nút `Cập nhật` để lấy kết quả mới nhất.
+3. **Phân Tích**: Bấm `Phân tích chuyên sâu` để nhận 10 bộ số vàng.
 
 ---
 
-## 🛠 CÀI ĐẶT NHANH
+### 🏗 KIẾN TRÚC HỆ THỐNG
 
-### Yêu cầu hệ thống
-*   **OS**: Windows 10/11 (Được tối ưu tốt nhất).
-*   **Python**: Phiên bản 3.10 trở lên.
-*   **RAM**: Tối thiểu 4GB (Khuyến nghị 8GB để huấn luyện mô hình mượt mà).
-
-### Hướng dẫn 3 bước
-1.  **Tải mã nguồn:**
-    ```bash
-    git clone https://github.com/vandang890615/vietlott.git
-    cd vietlott
-    ```
-2.  **Cài đặt thư viện:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-3.  **Khởi chạy:**
-    *   Chạy file **`MO_PHAN_MEM.bat`** (Click đúp chuột).
-    *   Hoặc lệnh: `python src/vietlott/predictor/gui_app.py`
+![Architecture](docs/architecture.svg)
 
 ---
-
-## 📈 STAR HISTORY
 
 <div align="center">
+
+**Developed by VanDang**
+*Last updated: 2026-02-02*
 
 [![Star History Chart](https://api.star-history.com/svg?repos=vandang890615/vietlott&type=Date)](https://star-history.com/#vandang890615/vietlott&Date)
-
-</div>
-
----
-
-## ⚠️ MIỄN TRỪ TRÁCH NHIỆM (DISCLAIMER)
-
-> **LƯU Ý QUAN TRỌNG**: Dự án này được phát triển với mục đích **NGHIÊN CỨU KHOA HỌC & GIÁO DỤC** về Data Science và Machine Learning.
-> 
-> *   Xổ số Vietlott về bản chất là trò chơi may rủi.
-> *   Không có thuật toán nào đảm bảo chiến thắng 100%.
-> *   Tác giả không chịu trách nhiệm về bất kỳ thiệt hại tài chính nào từ việc sử dụng phần mềm.
-> *   **Vui lòng chơi chừng mực và có trách nhiệm.**
-
----
-
-<div align="center">
-
-**Developed with ❤️ by VanDang**
-*© 2026 All Rights Reserved*
 
 </div>

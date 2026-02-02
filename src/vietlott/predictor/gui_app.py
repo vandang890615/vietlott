@@ -20,20 +20,20 @@ class VietlottGUI:
         header.pack(fill="x")
         
         # Title
-        tk.Label(header, text="🛡️ VIETLOTT AI PREDICTOR PRO", font=("Helvetica", 18, "bold"), fg="#00e5ff", bg="#1a1a1a").pack(pady=5)
+        tk.Label(header, text="🛡️ VIETLOTT AI PREDICTOR PRO", font=("Segoe UI", 20, "bold"), fg="#00e5ff", bg="#1a1a1a").pack(pady=5)
 
-        # COMPACT TECH INFO (Small, High Density)
+        # COMPACT TECH INFO (Modern Monospace)
         tech_bar = tk.Frame(header, bg="#1a1a1a")
         tech_bar.pack(fill="x")
-        tech_str = "CORE: LSTM Deep Learning | ENV: Python 3.11 | LIB: Pandas, NumPy, Sklearn, TensorFlow | UI: Tkinter 8.6 | DB: JSONL"
-        tk.Label(tech_bar, text=tech_str, font=("Consolas", 7), fg="#008855", bg="#1a1a1a").pack()
+        tech_str = "CORE: LSTM Deep Learning | ENV: Python 3.11 | LIB: TensorFlow, Pandas, Sklearn | UI: Modernized Tkinter"
+        tk.Label(tech_bar, text=tech_str, font=("Consolas", 8), fg="#00cc88", bg="#1a1a1a").pack()
 
-        # COUNTDOWN
+        # COUNTDOWN (High contrast font)
         timer_frame = tk.Frame(header, bg="#1a1a1a")
         timer_frame.pack(pady=5)
-        self.timer_45 = tk.Label(timer_frame, text="Mega 6/45: --:--:--", font=("Consolas", 12, "bold"), fg="#ff4d4d", bg="#1a1a1a")
+        self.timer_45 = tk.Label(timer_frame, text="Mega 6/45: --:--:--", font=("Consolas", 14, "bold"), fg="#ff4d4d", bg="#1a1a1a")
         self.timer_45.pack(side="left", padx=40)
-        self.timer_55 = tk.Label(timer_frame, text="Power 6/55: --:--:--", font=("Consolas", 12, "bold"), fg="#ffa366", bg="#1a1a1a")
+        self.timer_55 = tk.Label(timer_frame, text="Power 6/55: --:--:--", font=("Consolas", 14, "bold"), fg="#ffa366", bg="#1a1a1a")
         self.timer_55.pack(side="left", padx=40)
 
         # MARQUEE
