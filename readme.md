@@ -77,5 +77,6 @@ Chúng tôi kết hợp **LSTM (Long Short-Term Memory)** và **Transformer (Att
 <div align="center">
 
 **Developed by VanDang**
+*Last updated: 2026-02-02*
 
 </div>
