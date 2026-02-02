@@ -9,7 +9,7 @@
 
 **HỆ THỐNG DỰ ĐOÁN XỔ SỐ KHOA HỌC DỮ LIỆU & DEEP LEARNING**
 
-[TÍNH NĂNG](#-tính-năng-nổi-bật) • [CÀI ĐẶT](#-cài-đặt-nhanh) • [NGUYÊN LÝ](#-kiến-trúc-hệ-thống)
+[TÍNH NĂNG](#-tính-năng-nổi- bật) • [CÀI ĐẶT](#-cài-đặt-nhanh) • [NGUYÊN LÝ](#-kiến-trúc-hệ-thống)
 
 </div>
 
@@ -27,48 +27,45 @@ Không dùng tâm linh, không đoán mò. Chúng tôi sử dụng **Toán học
 
 ## 🚀 TÍNH NĂNG NỔI BẬT
 
-### 🧠 1. Deep Learning Core (Lõi AI)
-- **LSTM (Long Short-Term Memory)**: Mạng neron đặc biệt có khả năng "nhớ" chuỗi lịch sử dài hạn, chuyên dùng để dự báo chuỗi thời gian (Time-series Forecasting).
-- **Transformer (Attention Mechanism)**: Công nghệ đứng sau ChatGPT, giúp mô hình tập trung vào các kỳ quay có "trọng số" quan trọng nhất.
+### 🧠 1. Deep Learning Core
+- **LSTM (Long Short-Term Memory)**: Mạng neron có khả năng "nhớ" chuỗi lịch sử dài hạn, chuyên dùng để dự báo chuỗi thời gian.
+- **Transformer (Attention Mechanism)**: Công nghệ giúp mô hình tập trung vào các kỳ quay quan trọng nhất.
 
-### 🕵️ 2. Chiến lược Phân tích ngược (Reverse Engineering)
-- **Kiểm định Chi-Square**: Xác định độ ngẫu nhiên thực sự của lồng cầu.
-- **Phát hiện Bất thường**: Tìm ra các dấu hiệu lạ trong phân bố tổng, chẵn/lẻ.
-- **Lọc số thông minh (Smart Filter)**: Tự động loại bỏ >90% các bộ số có xác suất trúng cực thấp (Outliers).
+### 🕵️ 2. Chiến lược Phân tích ngược
+- **Kiểm định Chi-Square**: Xác định độ ngẫu nhiên của lồng cầu.
+- **Phát hiện Bất thường**: Tìm ra các dấu hiệu lạ trong phân bố kết quả.
+- **Lọc số thông minh**: Tự động loại bỏ >90% các bộ số có xác suất trúng thấp.
 
 ### 🖥️ 3. Giao diện Chuyên nghiệp
-- **Dark Mode**: Giao diện tối hiện đại, bảo vệ mắt.
+- **Dark Mode**: Giao diện tối hiện đại, chuyên nghiệp.
 - **Real-time Audit**: Tự động kiểm tra kết quả ngay khi có kỳ quay mới.
-- **1-Click**: Mọi thao tác Soi cầu, Cập nhật, Kiểm tra chỉ với 1 cú click.
+- **Tiện lợi**: Thao tác Soi cầu, Cập nhật chỉ với 1 cú click.
 
 ---
 
 ## 🏗 KIẾN TRÚC HỆ THỐNG
 
-Dưới đây là sơ đồ xử lý dữ liệu (Data Pipeline) của hệ thống:
-
 ```mermaid
 graph TD
-    A[🌍 VIETLOTT SERVER] -->|Auto Crawl| B[(🗄️ RAW DATA)]
-    B -->|Preprocessing| C{⚙️ AI ENGINE}
+    A[SERVER] -->|Crawl| B[DATABASE]
+    B -->|Process| C[AI ENGINE]
     
-    subgraph "Deep Learning Core"
-    C -->|Time Series| D[🧠 LSTM Model]
-    C -->|Attention| E[🤖 Transformer]
+    subgraph AI_Core
+    C --> D[LSTM Model]
+    C --> E[Transformer]
     end
     
-    subgraph "Statistical Core"
-    C -->|Pattern Finding| F[📈 Frequency Analysis]
-    C -->|Rule Check| G[🛡️ Reverse Strategy]
+    subgraph Stats_Core
+    C --> F[Frequency]
+    C --> G[Strategy]
     end
     
-    D --> H[Candidate Numbers]
+    D --> H[Results]
     E --> H
     F --> H
+    G --> H
     
-    H -->|Optimization Filter| I[✨ 10 GOLDEN TICKETS]
-    G --> I
-    I -->|User UI| J[🏆 FINAL PREDICTION]
+    H --> I[10 TICKETS]
 ```
 
 ---
@@ -76,40 +73,14 @@ graph TD
 ## 🛠 CÀI ĐẶT NHANH
 
 ### Yêu cầu hệ thống
-*   **Hệ điều hành**: Windows 10/11
-*   **Python**: 3.10 trở lên
-*   **RAM**: Tối thiểu 4GB (Khuyến nghị 8GB)
+* **Hệ điều hành**: Windows 10/11
+* **Python**: 3.10 trở lên
+* **RAM**: Tối thiểu 4GB
 
-### Hướng dẫn 3 bước
-
-1.  **Tải mã nguồn về máy:**
-    ```bash
-    git clone https://github.com/vandang890615/vietlott.git
-    cd vietlott
-    ```
-
-2.  **Cài đặt thư viện:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3.  **Khởi chạy phần mềm:**
-    *   Chạy file **`MO_PHAN_MEM.bat`** (Click đúp chuột).
-    *   Hoặc chạy lệnh: `python src/vietlott/predictor/gui_app.py`
-
----
-
-## ⚠️ MIỄN TRỪ TRÁCH NHIỆM (DISCLAIMER)
-
-> **Dự án này phục vụ mục đích NGHIÊN CỨU & HỌC TẬP.**
->
-> 1.  Xổ số là trò chơi có tính ngẫu nhiên cao.
-> 2.  Không có công cụ nào đảm bảo chiến thắng 100%.
-> 3.  Chúng tôi không khuyến khích hành vi cờ bạc thiếu kiểm soát.
-> 4.  Hãy sử dụng phần mềm có trách nhiệm!
-
----
-
+### Hướng dẫn sử dụng
+1. **Tải mã nguồn về máy**
+2. **Cài đặt thư viện**: `pip install -r requirements.txt`
+3. **Mở phần mềm**: Chạy file `MO_PHAN_MEM.bat`
 
 ---
 
@@ -120,6 +91,15 @@ graph TD
 [![Star History Chart](https://api.star-history.com/svg?repos=vandang890615/vietlott&type=Date)](https://star-history.com/#vandang890615/vietlott&Date)
 
 </div>
+
+---
+
+## ⚠️ MIỄN TRỪ TRÁCH NHIỆM
+
+> **Dự án này phục vụ mục đích NGHIÊN CỨU & HỌC TẬP.**
+> Xổ số có tính ngẫu nhiên cao. Không có công cụ nào đảm bảo trúng 100%. Hãy chơi có trách nhiệm!
+
+---
 
 <div align="center">
 
