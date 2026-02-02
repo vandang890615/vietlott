@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <!-- Styles -->
+  <style>
+    .box { fill: #1e1e1e; stroke: #00ff88; stroke-width: 2; rx: 10; ry: 10; }
+    .box-ai { fill: #2d2d2d; stroke: #ff9900; stroke-width: 3; rx: 10; ry: 10; }
+    .text { font-family: 'Segoe UI', sans-serif; fill: #ffffff; text-anchor: middle; font-size: 14px; font-weight: bold; }
+    .label { font-family: 'Segoe UI', sans-serif; fill: #aaaaaa; text-anchor: middle; font-size: 12px; }
+    .arrow { stroke: #555; stroke-width: 2; marker-end: url(#arrowhead); }
+  </style>
+  
+  <!-- Definitions -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="#0d0d0d" />
+
+  <!-- Nodes -->
+  <!-- 1. Source -->
+  <rect x="50" y="200" width="120" height="60" class="box" />
+  <text x="110" y="235" class="text">VIETLOTT VN</text>
+  <text x="110" y="290" class="label">Source Data</text>
+
+  <!-- 2. Crawler -->
+  <rect x="230" y="200" width="120" height="60" class="box" />
+  <text x="290" y="235" class="text">CRAWLER</text>
+  <text x="290" y="290" class="label">Python/Requests</text>
+
+  <!-- 3. Database -->
+  <rect x="230" y="50" width="120" height="60" class="box" style="stroke: #00ccff;" />
+  <text x="290" y="85" class="text">DATA LAKE</text>
+  <text x="290" y="140" class="label">JSONL Files</text>
+
+  <!-- 4. AI Engine -->
+  <rect x="410" y="150" width="180" height="160" class="box-ai" />
+  <text x="500" y="180" class="text" fill="#ff9900" font-size="16">AI PREDICTOR ENGINE</text>
+  
+  <!-- Sub-nodes inside AI -->
+  <rect x="430" y="200" width="140" height="40" fill="#333" rx="5" />
+  <text x="500" y="225" class="text" font-size="12">LSTM Layer (Time)</text>
+  
+  <rect x="430" y="250" width="140" height="40" fill="#333" rx="5" />
+  <text x="500" y="275" class="text" font-size="12">Transformer (Attention)</text>
+
+  <!-- 5. Output -->
+  <rect x="650" y="200" width="120" height="60" class="box" style="stroke: #ff3333;" />
+  <text x="710" y="225" class="text">10 BỘ SỐ</text>
+  <text x="710" y="245" class="text">TỐI ƯU</text>
+
+  <!-- Connections -->
+  <line x1="170" y1="230" x2="230" y2="230" class="arrow" />
+  <line x1="290" y1="200" x2="290" y2="110" class="arrow" />
+  <line x1="350" y1="80" x2="500" y2="80" class="arrow" /> <line x1="500" y1="80" x2="500" y2="150" class="arrow" />
+  <line x1="350" y1="230" x2="410" y2="230" class="arrow" />
+  
+  <line x1="590" y1="230" x2="650" y2="230" class="arrow" />
+
+</svg>

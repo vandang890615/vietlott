@@ -1,137 +1,66 @@
-# � VIETLOTT AI PREDICTOR PRO
+# VIETLOTT AI PREDICTOR PRO
 
-<div align="center">
+**HE THONG DU DOAN XO SO THONG MINH SU DUNG DEEP LEARNING**
 
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge)](https://github.com/vandang890615/vietlott/graphs/commit-activity)
-
-**HỆ THỐNG DỰ ĐOÁN XỔ SỐ KHOA HỌC DỮ LIỆU ĐỈNH CAO**
-*Sự kết hợp hoàn hảo giữa LSTM Deep Learning & Chiến lược Phân tích ngược (Reverse Engineering)*
-
-[Tính Năng](#-tính-năng-đột-phá) • [Cài Đặt](#-cài-đặt-nhanh) • [Hướng Dẫn](#-hướng-dẫn-sử-dụng) • [Nguyên Lý](#-công-nghệ-cốt-lõi)
-
-</div>
+[TINH NANG](#tinh-nang) - [CAI DAT](#cai-dat) - [ORIGIN](#origin)
 
 ---
 
-## � GIỚI THIỆU
+## GIOI THIEU
 
-> **"Không có gì là ngẫu nhiên hoàn toàn nếu bạn có đủ dữ liệu."**
+**Vietlott AI Predictor Pro** la du an Data Science nghien cuu ve xac suat thong ke va may hoc (Machine Learning). He thong su dung mang neron LSTM va Transformer de phan tich cac chuoi so trong qua khu.
 
-**Vietlott AI Predictor Pro** (v11.5) không phải là một công cụ đoán mò. Đây là một dự án **Data Science** nghiêm túc, được thiết kế để giải mã các quy luật ẩn sau những con số của Vietlott Mega 6/45 và Power 6/55.
-
-Hệ thống hoạt động như một cỗ máy khai phá dữ liệu (Data Mining), liên tục học hỏi từ >1000 kỳ quay trong quá khứ để tìm ra những khuôn mẫu mà mắt thường không thể nhìn thấy.
+![Architecture Diagram](docs/architecture.svg)
 
 ---
 
-## 🚀 TÍNH NĂNG ĐỘT PHÁ
+## TINH NANG NOI BAT
 
-### 🧠 1. Trí Tuệ Nhân Tạo (AI Core)
-*   **LSTM Neural Network**: Mạng neron ghi nhớ chuỗi dài, chuyên trị các dữ liệu thời gian (Time-series) như thị trường chứng khoán hay xổ số.
-*   **Transformer Attention**: Cơ chế "sự chú ý" giúp AI tập trung vào các kỳ quay có tầm ảnh hưởng lớn nhất trong lịch sử.
+### 1. Tri Tue Nhan Tao (AI)
+*   **LSTM Neural Network**: Ghi nho chuoi lich su.
+*   **Transformer Attention**: Tim kiem moi lien he giua cac ky quay.
 
-### �️ 2. Chiến lược Phân tích ngược (Reverse Engineering)
-*   **Randomness Test**: Kiểm tra độ ngẫu nhiên của lồng cầu bằng thuật toán Chi-Square.
-*   **Anomaly Detection**: Phát hiện các dấu hiệu bất thường về Tổng, Chẵn/Lẻ, và Tần suất xuất hiện.
-*   **Smart Filter**: Loại bỏ 95% các bộ số "rác" (như 1-2-3-4-5-6) để tối ưu hóa cơ hội.
+### 2. Chien Luoc Loc So
+*   **Kiem Dinh**: Loai bo cac bo so co xac suat qua thap.
+*   **Thong Ke**: Phan tich tan suat, tong, chan/le.
 
-### � 3. Hệ thống Audit & Tracking
-*   **Real-time Audit**: Tự động đối soát kết quả ngay khi có kỳ quay mới.
-*   **Win/Loss History**: Lưu trữ lịch sử dự đoán minh bạch, không thể gian lận.
-
-### �️ 4. Giao diện Người dùng (GUI)
-*   **Dark Mode**: Giao diện tối hiện đại, dịu mắt.
-*   **Live Countdown**: Đếm ngược từng giây đến giờ quay thưởng.
-*   **One-Click Operation**: Mọi thao tác phức tạp chỉ gói gọn trong 1 cú click chuột.
+### 3. Giao Dien Nguoi Dung
+*   Giao dien Dark Mode hien dai.
+*   Dem nguoc thoi gian thuc.
+*   Thao tac don gian 1-Click.
 
 ---
 
-## 🛠 CÀI ĐẶT NHANH
+## CAI DAT VA SU DUNG
 
-### Yêu cầu hệ thống
-| Thành phần       | Yêu cầu tối thiểu | Khuyến nghị             |
-| :--------------- | :---------------- | :---------------------- |
-| **Hệ điều hành** | Windows 10        | Windows 11              |
-| **Python**       | 3.10              | 3.11+                   |
-| **RAM**          | 4 GB              | 8 GB+                   |
-| **Internet**     | Có                | Ổn định (để crawl data) |
+### Yeu Cau
+*   Windows 10 hoac 11
+*   Python 3.10+
+*   RAM 4GB+
 
-### 3 Bước Cài Đặt
-
-1.  **Tải mã nguồn:**
-    ```bash
-    git clone https://github.com/vandang890615/vietlott.git
-    cd vietlott
-    ```
-
-2.  **Cài đặt thư viện:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3.  **Khởi chạy:**
-    *   Cách 1: Chạy file `MO_PHAN_MEM.bat` (Khuyên dùng)
-    *   Cách 2: `python src/vietlott/predictor/gui_app.py`
+### Cai Dat
+1.  **Clone project**:
+    `git clone https://github.com/vandang890615/vietlott.git`
+2.  **Cai dat thu vien**:
+    `pip install -r requirements.txt`
+3.  **Chay phan mem**:
+    Chay file `MO_PHAN_MEM.bat`
 
 ---
 
-## � HƯỚNG DẪN SỬ DỤNG
+## NGUYEN LY HOAT DONG
 
-### Quy trình "Chuẩn Pro" hàng ngày:
-
-1.  🟢 **BƯỚC 1: CẬP NHẬT (18h45)**
-    *   Mở app, bấm `CẬP NHẬT KẾT QUẢ MỚI`.
-    *   Hệ thống sẽ tải kết quả vừa quay từ server Vietlott.
-
-2.  🟡 **BƯỚC 2: AUDIT**
-    *   Bấm `KIỂM TRA DỰ ĐOÁN`.
-    *   Xem AI đã dự đoán đúng bao nhiêu số ở kỳ trước.
-
-3.  🔴 **BƯỚC 3: PHÂN TÍCH (Trước 18h00 hôm sau)**
-    *   Bấm `PHÂN TÍCH CHUYÊN SÂU`.
-    *   Chọn loại vé (Mega/Power).
-    *   Chờ AI "nghiền ngẫm" dữ liệu và xuất ra **10 Bộ Số Vàng**.
-    *   Bấm `YES` để chốt số.
+1.  **Thu thap**: Crawler tai du lieu tu vietlott.vn
+2.  **Xu ly**: Lam sach va chuan hoa du lieu.
+3.  **Huan luyen**: AI deep learning hoc tu du lieu lich su.
+4.  **Du bao**: Dua ra 10 bo so tiem nang nhat.
 
 ---
 
-## 🔬 CÔNG NGHỆ CỐT LÕI
+## DISCLAIMER
 
-Dưới đây là sơ đồ luồng xử lý của hệ thống:
-
-```mermaid
-graph TD
-    A[Vietlott Server] -->|Crawl Data| B(Raw Database)
-    B -->|Preprocessing| C{AI Engine}
-    C -->|LSTM Model| D[Time Series Pattern]
-    C -->|Statistical| E[Frequency Analysis]
-    D --> F[Candidate Generation]
-    E --> F
-    F -->|Filter Strategy| G[10 Optimized Tickets]
-    G -->|User Decision| H[Final Prediction]
-```
+Du an nay phuc vu muc dich **NGHIEN CUU GIAO DUC**. Xo so la tro choi may rui, khong co thuat toan nao dam bao chien thang. Tac gia khong chiu trach nhiem ve viec su dung cua nguoi dung.
 
 ---
-
-## ⚠️ MIỄN TRỪ TRÁCH NHIỆM
-
-> **DISCLAIMER:**
->
-> Dự án này được xây dựng với mục đích **NGHIÊN CỨU KHOA HỌC DỮ LIỆU**.
-> *   Xổ số Vietlott về bản chất là trò chơi có xác suất ngẫu nhiên cao.
-> *   Không có thuật toán nào trên thế giới đảm bảo chiến thắng 100%.
-> *   Chúng tôi **không khuyến khích** bài bạc hay cá độ dưới mọi hình thức.
-> *   **Hãy chơi có trách nhiệm và chỉ chơi cho vui!**
-
----
-
-<div align="center">
-
-**Developed with ❤️ & 🧠 by VanDang**
-*© 2026 All Rights Reserved*
-
-[⬆ Về đầu trang](#-vietlott-ai-predictor-pro)
-
-</div>
+**Developed by VanDang**
+*Last updated: Feb 2026*
