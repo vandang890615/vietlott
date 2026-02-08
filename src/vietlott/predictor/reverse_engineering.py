@@ -135,12 +135,11 @@ class DeepLearningPredictor:
         print(f"   🔴 Số lượng trùng khớp trung bình: {avg_matches:.2f} / 6 số")
         return avg_matches
 
-    def predict_next(self, model, X_last):
+    def predict_next_probs(self, model, X_last):
+        """Return the probability distribution for the next draw."""
         last_sequence = X_last[-1].reshape(1, self.look_back, self.num_classes)
         next_pred_probs = model.predict(last_sequence, verbose=0)[0]
-        top_6_indices = next_pred_probs.argsort()[-6:][::-1]
-        next_nums = sorted([idx + 1 for idx in top_6_indices])
-        return next_nums
+        return next_pred_probs
 
 class TransformerPredictor(DeepLearningPredictor):
     def run(self, epochs=20):
@@ -152,12 +151,16 @@ class TransformerPredictor(DeepLearningPredictor):
             import tensorflow as tf
             from tensorflow.keras import layers, models, optimizers
         except ImportError:
-            return
+            return None
 
         X, y = self.prepare_data()
         test_size = 50
-        X_train, X_test = X[:-test_size], X[-test_size:]
-        y_train, y_test = y[:-test_size], y[-test_size:]
+        if len(X) > test_size:
+            X_train, X_test = X[:-test_size], X[-test_size:]
+            y_train, y_test = y[:-test_size], y[-test_size:]
+        else:
+            X_train, X_test = X, X
+            y_train, y_test = y, y
 
         # Transformer Block Integration
         inputs = layers.Input(shape=(self.look_back, self.num_classes))
@@ -178,24 +181,37 @@ class TransformerPredictor(DeepLearningPredictor):
         model.compile(loss='binary_crossentropy', optimizer=optimizers.Adam(0.001), metrics=['accuracy'])
         
         print(f"   - Training Transformer ({epochs} epochs)...")
-        model.fit(X_train, y_train, epochs=epochs, batch_size=32, verbose=0, validation_split=0.1)
+        model.fit(X_train, y_train, epochs=epochs, batch_size=32, verbose=0)
         
-        self.evaluate(model, X_test, y_test)
-        vals = self.predict_next(model, X)
-        print(f"🔮 DỰ ĐOÁN (TRANSFORMER): {vals}")
-        return vals
+        if len(X) > test_size:
+            self.evaluate(model, X_test, y_test)
+            
+        probs = self.predict_next_probs(model, X)
+        
+        # Print top prediction for log
+        top_6_indices = probs.argsort()[-6:][::-1]
+        vals = sorted([idx + 1 for idx in top_6_indices])
+        print(f"🔮 DỰ ĐOÁN (TRANSFORMER TOP 6): {vals}")
+        
+        return probs
 
 # ================= FILTERING STRATEGY =================
 
 class FilterStrategy:
-    def __init__(self, history, max_num=45):
+    def __init__(self, history, max_num=45, ai_probs=None):
         self.history = history
         self.max_num = max_num
+        self.ai_probs = ai_probs
+        
         # Calculate stats for boundaries
         sums = [sum(d['numbers']) for d in history]
-        self.min_sum = np.percentile(sums, 5)  # Loại bỏ 5% thấp nhất
-        self.max_sum = np.percentile(sums, 95) # Loại bỏ 5% cao nhất
-        
+        if sums:
+            self.min_sum = np.percentile(sums, 5)  # Loại bỏ 5% thấp nhất
+            self.max_sum = np.percentile(sums, 95) # Loại bỏ 5% cao nhất
+        else:
+            self.min_sum = 0
+            self.max_sum = 999
+            
     def check_sum(self, nums):
         s = sum(nums)
         return self.min_sum <= s <= self.max_sum
@@ -218,10 +234,11 @@ class FilterStrategy:
         lds = set(n % 10 for n in nums)
         return len(lds) >= 4
 
-    def generate_optimized_tickets(self, count=5):
+    def generate_optimized_tickets(self, count=10):
         print("\n" + "🛡️"*30)
-        print("CHIẾN LƯỢC LỌC & TỐI ƯU (REDUCTION STRATEGY)")
+        print("CHIẾN LƯỢC LỌC & TỐI ƯU (AI-DRIVEN REDUCTION)")
         print("🛡️"*30)
+        print(f"   -> Sử dụng xác suất từ mô hình Transformer để lấy mẫu")
         print(f"   -> Loại bỏ bộ số có Tổng ngoài [{self.min_sum:.0f}, {self.max_sum:.0f}]")
         print(f"   -> Chỉ nhận tỷ lệ Chẵn/Lẻ: 2:4, 3:3, 4:2")
         print(f"   -> Loại bỏ bộ 3 số liên tiếp (VD: 1,2,3)")
@@ -229,12 +246,39 @@ class FilterStrategy:
         
         valid_tickets = []
         attempts = 0
-        max_attempts = count * 5000
+        max_attempts = count * 10000 # Increased attempts as finding valid weighted samples might be harder
         
+        # Prepare probabilities
+        if self.ai_probs is not None:
+            # Normalize to sum to 1
+            p = self.ai_probs
+            p = p / np.sum(p)
+            print("   -> Đã áp dụng trọng số AI cho việc tạo vé.")
+        else:
+            p = None
+            print("   -> Cảnh báo: Không có trọng số AI, sử dụng ngẫu nhiên.")
+            
         while len(valid_tickets) < count and attempts < max_attempts:
             attempts += 1
-            # Random generation
-            nums = sorted(random.sample(range(1, self.max_num + 1), 6))
+            
+            try:
+                # Weighted random generation if probs available
+                if p is not None:
+                    # Choose 6 numbers based on AI probability
+                    # range(1, self.max_num + 1) corresponds to indices 0..max_num-1
+                    # self.ai_probs has length self.max_num (hopefully)
+                    nums = np.random.choice(
+                        range(1, self.max_num + 1), 
+                        size=6, 
+                        replace=False, 
+                        p=p
+                    )
+                    nums = sorted(nums)
+                else:
+                    nums = sorted(random.sample(range(1, self.max_num + 1), 6))
+            except Exception as e:
+                # Fallback if probability math fails
+                nums = sorted(random.sample(range(1, self.max_num + 1), 6))
             
             # Apply Filters
             if not self.check_sum(nums): continue
@@ -242,8 +286,9 @@ class FilterStrategy:
             if not self.check_consecutive(nums): continue
             if not self.check_last_digit(nums): continue
             
-            if nums not in valid_tickets:
-                valid_tickets.append(nums)
+            # Check for duplicates
+            if list(nums) not in valid_tickets:
+                valid_tickets.append(list(nums))
         
         print(f"\n✅ Đã tạo {len(valid_tickets)} bộ số tối ưu (sau {attempts} lần thử):")
         for i, t in enumerate(valid_tickets, 1):
@@ -295,10 +340,11 @@ def run_analysis_and_get_report(product_type="power_645"):
 
         # 2. Run Transformer
         transformer = TransformerPredictor(detector.history, max_num=max_num)
-        transformer.run(epochs=20) # 20 epochs enough
+        # Use more epochs for deeper analysis
+        probs = transformer.run(epochs=30) 
         
-        # 3. Run Filter Strategy
-        filter_strat = FilterStrategy(detector.history, max_num=max_num)
+        # 3. Run Filter Strategy with AI Probs
+        filter_strat = FilterStrategy(detector.history, max_num=max_num, ai_probs=probs)
         tickets = filter_strat.generate_optimized_tickets(count=10)
 
     return f.getvalue(), tickets

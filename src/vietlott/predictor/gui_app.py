@@ -53,10 +53,11 @@ class VietlottGUI:
         body.grid_columnconfigure(2, weight=1)
         body.grid_rowconfigure(0, weight=1)
 
-        # COLUMN 0: MEGA
         c0 = tk.LabelFrame(body, text=" 🔴 DỰ ĐOÁN MEGA 6/45 ", fg="#ff4d4d", bg="#141414", font=("Arial", 11, "bold"), padx=5, pady=5)
         c0.grid(row=0, column=0, sticky="nsew", padx=5)
-        ttk.Button(c0, text="🔥 SOI CẦU MEGA MỚI", command=lambda: self.start_prediction("power_645")).pack(fill="x")
+        self.btn_soi_45 = ttk.Button(c0, text="🔥 SOI CẦU MEGA MỚI", command=lambda: self.start_prediction("power_645"), state="disabled")
+        self.btn_soi_45.pack(fill="x")
+        tk.Label(c0, text="Lưu ý: Bạn nên sử dụng 'PHÂN TÍCH CHUYÊN SÂU'", font=("Arial", 8, "italic"), fg="#ff9999", bg="#141414").pack()
         self.lock_45 = tk.Text(c0, font=("Consolas", 10), bg="#1a0d0d", fg="#ffaaaa", borderwidth=0, height=12)
         self.lock_45.pack(fill="x", pady=5)
         
@@ -71,26 +72,34 @@ class VietlottGUI:
         c1 = tk.LabelFrame(body, text=" ⏳ KẾT QUẢ MỚI NHẤT ", fg="#00ff88", bg="#141414", font=("Arial", 11, "bold"), padx=5, pady=5)
         c1.grid(row=0, column=1, sticky="nsew", padx=5)
         
-        # CONTROL PANEL
-        ctrl_frame = tk.Frame(c1, bg="#141414")
+        # BẢNG ĐIỀU KHIỂN HỆ THỐNG
+        ctrl_frame = tk.LabelFrame(c1, text=" 🛠️ BẢNG ĐIỀU KHIỂN ", fg="#ffcc00", bg="#1a1a1a", font=("Arial", 9, "bold"), padx=5, pady=5)
         ctrl_frame.pack(fill="x", pady=(0, 5))
         
-        self.btn_crawl = ttk.Button(ctrl_frame, text="🌐 CẬP NHẬT KẾT QUẢ MỚI", command=self.update_data)
-        self.btn_crawl.pack(side="left", padx=2, expand=True, fill="x")
+        # Grid layout for buttons
+        ctrl_frame.columnconfigure(0, weight=1)
+        ctrl_frame.columnconfigure(1, weight=1)
+
+        self.btn_crawl = ttk.Button(ctrl_frame, text="🌐 CẬP NHẬT DỮ LIỆU", command=self.update_data)
+        self.btn_crawl.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
         
         self.btn_audit = ttk.Button(ctrl_frame, text="🔍 KIỂM TRA DỰ ĐOÁN", command=self.run_audit)
-        self.btn_audit.pack(side="left", padx=2, expand=True, fill="x")
+        self.btn_audit.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
 
         self.btn_reverse = ttk.Button(ctrl_frame, text="🧠 PHÂN TÍCH CHUYÊN SÂU", command=self.run_reverse_engineering)
-        self.btn_reverse.pack(side="left", padx=2, expand=True, fill="x")
+        self.btn_reverse.grid(row=1, column=0, sticky="nsew", padx=2, pady=2)
+
+        self.btn_stats = ttk.Button(ctrl_frame, text="📊 THỐNG KÊ HIỆU SUẤT", command=self.show_overall_stats)
+        self.btn_stats.grid(row=1, column=1, sticky="nsew", padx=2, pady=2)
         
         self.hist_text = tk.Text(c1, font=("Consolas", 10), bg="#000", fg="#e0e0e0", borderwidth=0)
         self.hist_text.pack(fill="both", expand=True)
 
-        # COLUMN 2: POWER
         c2 = tk.LabelFrame(body, text=" 🟠 DỰ ĐOÁN POWER 6/55 ", fg="#ffa366", bg="#141414", font=("Arial", 11, "bold"), padx=5, pady=5)
         c2.grid(row=0, column=2, sticky="nsew", padx=5)
-        ttk.Button(c2, text="🔥 SOI CẦU POWER MỚI", command=lambda: self.start_prediction("power_655")).pack(fill="x")
+        self.btn_soi_55 = ttk.Button(c2, text="🔥 SOI CẦU POWER MỚI", command=lambda: self.start_prediction("power_655"), state="disabled")
+        self.btn_soi_55.pack(fill="x")
+        tk.Label(c2, text="Lưu ý: Bạn nên sử dụng 'PHÂN TÍCH CHUYÊN SÂU'", font=("Arial", 8, "italic"), fg="#ffccaa", bg="#141414").pack()
         self.lock_55 = tk.Text(c2, font=("Consolas", 10), bg="#1a140d", fg="#ffccaa", borderwidth=0, height=12)
         self.lock_55.pack(fill="x", pady=5)
         
@@ -284,9 +293,9 @@ class VietlottGUI:
                 X, y = p.create_sequences(d)
                 p.build_model(input_shape=(X.shape[1], X.shape[2]))
                 
-                # Training (mất ~30 giây)
-                self.root.after(0, lambda: self.status_var.set(f"🧠 Đang huấn luyện AI (15 epochs)..."))
-                p.train(X, y, epochs=15)
+                # Training (tăng lên 50-60 giây để chính xác hơn)
+                self.root.after(0, lambda: self.status_var.set(f"🧠 Đang huấn luyện AI Deep Learning (30 epochs)..."))
+                p.train(X, y, epochs=30)
                 
                 # Dự đoán
                 self.root.after(0, lambda: self.status_var.set(f"🔮 Đang tạo dự đoán..."))
@@ -496,6 +505,43 @@ class VietlottGUI:
         self.hist_text.delete("1.0", tk.END)
         self.hist_text.insert(tk.END, report)
         self.hist_text.config(state="disabled")
+
+    def show_overall_stats(self):
+        """Hiển thị bảng thống kê hiệu suất dựa trên audit_log.json"""
+        try:
+            from lstm_predictor import get_detailed_stats
+            
+            stats_45 = get_detailed_stats("power_645")
+            stats_55 = get_detailed_stats("power_655")
+            
+            report = "📊 BÁO CÁO HIỆU SUẤT DỰ ĐOÁN TOÀN HỆ THỐNG\n"
+            report += "═" * 45 + "\n\n"
+            
+            for name, stats in [("MEGA 6/45", stats_45), ("POWER 6/55", stats_55)]:
+                report += f"▶️ SẢN PHẨM: {name}\n"
+                if stats:
+                    report += f"   - Tổng số kỳ đã soi: {stats['total_draws']}\n"
+                    report += f"   - Tổng số vé đã chốt: {stats['total_tickets']}\n"
+                    report += f"   - Số vé trúng (>= 3 số): {stats['wins']}\n"
+                    report += f"   - Tỷ lệ thắng trung bình: {stats['win_rate']}%\n"
+                    report += "   - Chi tiết trúng khớp:\n"
+                    for i in range(7):
+                        count = stats['distribution'].get(i, 0)
+                        pct = (count / stats['total_tickets'] * 100) if stats['total_tickets'] > 0 else 0
+                        report += f"      + Trùng {i} số: {count} vé ({pct:.1f}%)\n"
+                else:
+                    report += "   - (Chưa có dữ liệu đối soát cho sản phẩm này)\n"
+                report += "\n"
+            
+            report += "═" * 45 + "\n"
+            report += f"Cập nhật lúc: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
+            report += "Mẹo: Hãy dùng 'Phân tích chuyên sâu' để tăng tỷ lệ trúng!"
+            
+            self._show_report(report)
+            self.status_var.set("✅ Đã hiển thị thống kê hiệu suất.")
+            
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể tạo thống kê: {str(e)}")
 
 if __name__ == "__main__":
     root = tk.Tk()

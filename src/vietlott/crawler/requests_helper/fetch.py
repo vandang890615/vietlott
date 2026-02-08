@@ -57,9 +57,6 @@ def fetch_wrapper(
         tasks_str = ",".join(str(t["task_id"]) for t in tasks)
         logger.debug(f"worker start, tasks_ids={tasks_str}")
         _headers = headers.copy()
-        # using proxy to avoid ban github ip
-        proxies = get_proxies()
-        # print(proxies)
 
         results = []
         for task in tasks:
@@ -70,53 +67,33 @@ def fetch_wrapper(
             params.update(task_data["params"])
             body.update(task_data["body"])
 
-            for index, row in proxies.iterrows():
-                str_proxy = f"{row['IP Address']}:{row['Port']}"
-                if str_proxy in bad_proxies: continue
-                # print(f"proxy: {str_proxy}")
+            try:
+                res = requests.post(
+                    url,
+                    json=body,
+                    params=params,
+                    headers=_headers,
+                    cookies=cookies,
+                    timeout=TIMEOUT
+                )
 
-                proxy = { "http": str_proxy, "https": str_proxy }
-
+                if not res.ok:
+                    logger.error(
+                        f"req failed, args={task_data}, code={res.status_code}, res={res.text[:200]}"
+                    )
+                    continue
                 try:
-                    res = requests.post(
-                        url,
-                        json=body,
-                        params=params,
-                        headers=_headers,
-                        cookies=cookies,
-                        timeout=TIMEOUT,
-                        proxies=proxy
+                    result = process_result_fn(params, body, res.json(), task_data)
+                    results.append(result)
+                    logger.debug(f"task {task_id} done")
+                except Exception as error:
+                    logger.error(
+                        f"{type(error).__name__}, args={task_data}, text={res.text[:200]}, headers={headers}, cookies={cookies}, body={body}, params={params}"
                     )
 
-                    if not res.ok:
-                        bannedMess = "You are unable to access"
-                        if bannedMess in res.text:
-                            logger.error(
-                                # f"req failed, args={task_data}, code={res.status_code}, headers={_headers}, params={params}, body={body}, res={res.text}, text={res.text[:200]}"
-                                f"req failed, args={task_data}, code={res.status_code}, proxy={str_proxy}, res='Banned IP!!!'"
-                            )
-                        else:
-                            logger.error(
-                                # f"req failed, args={task_data}, code={res.status_code}, headers={_headers}, params={params}, body={body}, res={res.text}, text={res.text[:200]}"
-                                f"req failed, args={task_data}, code={res.status_code}, proxy={str_proxy}, res={res.text}"
-                            )
-                        add_to_bad_list(str_proxy)
-                        continue
-                    try:
-                        result = process_result_fn(params, body, res.json(), task_data)
-                        results.append(result)
-                        logger.debug(f"task {task_id}, proxy={str_proxy} done")
-                        break # break the proxy loop
-                    except Exception as error:
-                        logger.error(
-                            f"{type(error).__name__}, args={task_data}, text={res.text[:200]}, headers={headers}, cookies={cookies}, body={body}, params={params}"
-                        )
-
-                # handle exception on request
-                except Exception as error:
-                    # logger.error(f"{type(error).__name__}, task {task_id}, proxy={str_proxy}, error={error}")
-                    logger.error(f"{type(error).__name__}, task {task_id}, proxy={str_proxy}")
-                    add_to_bad_list(str_proxy)
+            # handle exception on request
+            except Exception as error:
+                logger.error(f"{type(error).__name__}, task {task_id}, error={error}")
 
         logger.debug(f"worker done, tasks={tasks_str}")
         return results
@@ -125,20 +102,7 @@ def fetch_wrapper(
 
 
 def get_proxies():
-    try:
-        resp = requests.get('https://free-proxy-list.net/')
-        resp.raise_for_status()
-        df = pd.read_html(StringIO(resp.text))[0]
-        # df = df[(df['Anonymity'] == 'elite proxy') & (df['Https'] == 'yes') & (df['Code'] == 'VN')]
-        # # sort the 'VN' first
-        # df['Order'] = df['Code'].apply(lambda x: 0 if x == 'VN' else 1)
-        # df = df.sort_values(by='Order').drop('Order', axis=1)
-        # get only VN proxies
-        df = df[(df['Code'] == 'VN')]
-    except Exception as e:
-        logger.error(f"Failed to fetch proxy list: {e}")
-        return pd.DataFrame()  # return an empty DataFrame or handle it as needed
-    return df
+    return pd.DataFrame()
 
 
 def add_to_bad_list(item):
