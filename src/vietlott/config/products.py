@@ -52,8 +52,54 @@ keno_config = ProductConfig(
     page_size=6,
     use_cookies=False,
 )
+max3d_config = ProductConfig(
+    name="max3d",
+    raw_path=data_dir / "max3d.jsonl",
+    min_value=0,
+    max_value=999,
+    size_output=3,
+    interval=timedelta(days=1),
+    use_cookies=False,
+)
+max3d_pro_config = ProductConfig(
+    name="max3d_pro",
+    raw_path=data_dir / "max3d_pro.jsonl",
+    min_value=0,
+    max_value=999,
+    size_output=3,
+    interval=timedelta(days=1),
+    use_cookies=False,
+)
+lotto_config = ProductConfig(
+    name="lotto",
+    raw_path=data_dir / "lotto.jsonl",
+    min_value=1,
+    max_value=35,
+    size_output=6, # 5 main + 1 special
+    interval=timedelta(days=2),
+    use_cookies=False,
+)
+bingo18_config = ProductConfig(
+    name="bingo18",
+    raw_path=data_dir / "bingo18.jsonl",
+    min_value=1,
+    max_value=6,
+    size_output=3,
+    interval=timedelta(minutes=10),
+    use_cookies=False,
+)
 
-product_config_map = {c.name: c for c in [power645_config, power655_config, keno_config]}
+max3d_plus_config = ProductConfig(
+    name="max3d_plus",
+    raw_path=data_dir / "max3d.jsonl",
+    min_value=0,
+    max_value=999,
+    size_output=3,
+    interval=timedelta(days=1),
+    use_cookies=False,
+)
+
+product_config_map = {c.name: c for c in [power645_config, power655_config, keno_config, max3d_config, max3d_pro_config, max3d_plus_config, lotto_config, bingo18_config]}
 
 
 def get_config(name: str) -> ProductConfig:

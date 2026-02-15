@@ -4,7 +4,7 @@ import pandas as pd
 from loguru import logger
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Setup configuration
 try:
@@ -50,16 +50,37 @@ class LSTMPredictor:
 
     def build_model(self, input_shape):
         import tensorflow as tf
-        from tensorflow.keras.models import Sequential
-        from tensorflow.keras.layers import LSTM, Dense, Dropout
-        model = Sequential([
-            LSTM(128, return_sequences=True, input_shape=input_shape),
-            Dropout(0.2),
-            LSTM(128),
-            Dropout(0.2),
-            Dense(64, activation='relu'),
-            Dense(self.max_num, activation='sigmoid') # Probability for each number
-        ])
+        from tensorflow.keras.models import Model
+        from tensorflow.keras.layers import LSTM, Dense, Dropout, Input, Bidirectional, Attention, LayerNormalization, Concatenate
+        
+        # Modern Functional API Model
+        inputs = Input(shape=input_shape)
+        
+        # 1. Bidirectional LSTM for context
+        lstm1 = Bidirectional(LSTM(128, return_sequences=True))(inputs)
+        lstm1 = LayerNormalization()(lstm1)
+        dropout1 = Dropout(0.2)(lstm1)
+        
+        lstm2 = Bidirectional(LSTM(64, return_sequences=True))(dropout1)
+        lstm2 = LayerNormalization()(lstm2)
+        
+        # 2. Simple Attention Mechanism
+        # Query, Value, Key
+        query = Dense(128)(lstm2)
+        value = Dense(128)(lstm1) # Skip connection from first layer
+        attn_out = Attention(use_scale=True)([query, value])
+        
+        # 3. Aggregation
+        flat = tf.keras.layers.GlobalAveragePooling1D()(attn_out)
+        
+        # 4. Dense Layers
+        dense1 = Dense(128, activation='relu')(flat)
+        dropout2 = Dropout(0.2)(dense1)
+        dense2 = Dense(64, activation='relu')(dropout2)
+        
+        output = Dense(self.max_num, activation='sigmoid')(dense2)
+        
+        model = Model(inputs=inputs, outputs=output)
         model.compile(optimizer='adam', loss='binary_crossentropy')
         self.model = model
         return model
@@ -67,37 +88,92 @@ class LSTMPredictor:
     def train(self, X, y, epochs=30, batch_size=32):
         self.model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=0)
 
-    def predict_next(self, last_window, temperature=1.0):
-        """Predict by sampling from the probability distribution."""
+    def predict_diverse_batch(self, last_window, df_context=None, batch_size=10, count=6, diversity_weight=0.5):
+        """
+        Generate a batch of tickets with maximized diversity using a penalty mechanism.
+        'Quantum-Inspired' approach to spread coverage over the probability manifold.
+        """
+        last_window_expanded = np.expand_dims(last_window, axis=0)
+        base_probs = self.model.predict(last_window_expanded, verbose=0)[0]
+        
+        # Signal Fusion
+        if df_context is not None:
+            try:
+                from vietlott.predictor.signal_scorer import SignalScorer, apply_signals
+                scorer = SignalScorer(df_context, self.max_num)
+                freq, gap = scorer.get_signals()
+                base_probs = apply_signals(base_probs, freq, gap)
+            except: pass
+
+        tickets = []
+        counts = np.zeros(self.max_num) # Track how many times each number is used in the batch
+
+        for _ in range(batch_size):
+            # Apply diversity penalty: more used = lower prob
+            # penalty factor: 1.0 - (usage_count / current_batch_index) * weight
+            penalty = np.ones(self.max_num)
+            if len(tickets) > 0:
+                penalty = 1.0 - (counts * diversity_weight / len(tickets))
+                penalty = np.clip(penalty, 0.1, 1.0) # Don't zero out completely
+
+            adjusted_probs = base_probs * penalty
+            normalized_probs = adjusted_probs / np.sum(adjusted_probs)
+            
+            try:
+                choice_indices = np.random.choice(
+                    range(1, self.max_num + 1), 
+                    size=count, 
+                    replace=False, 
+                    p=normalized_probs
+                )
+                ticket = sorted([int(n) for n in choice_indices])
+            except:
+                # Fallback to top numbers if sampling fails
+                ticket = sorted(np.argsort(adjusted_probs)[-count:] + 1)
+            
+            tickets.append(ticket)
+            # Update counts for next iteration
+            for n in ticket:
+                counts[n-1] += 1
+                
+        return tickets
+
+    def predict_next(self, last_window, df_context=None, temperature=1.0, count=6):
+        """Predict by sampling from the probability distribution with signal fusion."""
         last_window_expanded = np.expand_dims(last_window, axis=0)
         probs = self.model.predict(last_window_expanded, verbose=0)[0]
         
-        # Apply temperature to sharpen or flatten the distribution
+        # Signal Fusion if context is provided
+        if df_context is not None:
+            try:
+                from vietlott.predictor.signal_scorer import SignalScorer, apply_signals
+                scorer = SignalScorer(df_context, self.max_num)
+                freq, gap = scorer.get_signals()
+                probs = apply_signals(probs, freq, gap)
+            except Exception as e:
+                logger.error(f"Signal Fusion failed: {e}")
+
+        # Apply temperature
         if temperature != 1.0:
             probs = np.power(probs, 1.0 / temperature)
             probs = probs / np.sum(probs)
         
-        # Get indices of numbers, sorted by probability
-        # Instead of just taking the top 6, let's sample to get variety
-        # But we need exactly 6.
-        # Simple sampling logic: 
-        # Normalize probs to sum to 1 for sampling (the model uses sigmoid so they don't sum to 1)
         normalized_probs = probs / np.sum(probs)
         
-        # Sample 6 numbers without replacement
+        # Sample numbers without replacement
         try:
             choice_indices = np.random.choice(
                 range(1, self.max_num + 1), 
-                size=6, 
+                size=count, 
                 replace=False, 
                 p=normalized_probs
             )
             return sorted([int(n) for n in choice_indices])
-        except:
-            # Fallback if sampling fails (e.g. all zeros)
-            return sorted(np.argsort(probs)[-6:] + 1)
+        except Exception:
+            # Fallback
+            return sorted(np.argsort(probs)[-count:] + 1)
 
-def log_predictions(product, tickets):
+def log_predictions(product, tickets, target_draw_id=None):
     """Save predictions to a log file for future audit."""
     log_file = "data/audit_log.json"
     audit_data = []
@@ -111,6 +187,7 @@ def log_predictions(product, tickets):
     entry = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "product": product,
+        "target_draw_id": str(target_draw_id) if target_draw_id else None,
         "predictions": [[int(n) for n in t] for t in tickets],
         "checked": False,
         "actual_result": None,
@@ -123,6 +200,9 @@ def log_predictions(product, tickets):
 def check_audit_log(product_filter=None):
     """Check past predictions against latest data, optionally filtered by product."""
     log_file = "data/audit_log.json"
+    from datetime import datetime, timedelta
+    import pandas as pd
+    
     if not os.path.exists(log_file):
         return 0
     
@@ -147,29 +227,62 @@ def check_audit_log(product_filter=None):
         df = pd.read_json(config.raw_path, lines=True).sort_values(by=["date"], ascending=True)
         if df.empty: continue
         
-        # 1. Get prediction date time
-        p_time = pd.to_datetime(entry["timestamp"])
-            
-        # 2. Find the first draw that happened STRICTLY AFTER prediction time
-        def get_available_dt(d_val):
-             if isinstance(d_val, str):
-                 dt = datetime.strptime(d_val, "%Y-%m-%d")
-             else:
-                 dt = d_val
-             return dt.replace(hour=19, minute=0, second=0)
-             
-        valid_draws = df[df['date'].apply(lambda x: get_available_dt(x)) > p_time]
+        def get_numeric_id(val):
+            try: return int(str(val).replace('#', '').strip())
+            except: return None
+
+        # 1. Match by Draw ID if available
+        target_draw = None
+        t_id_numeric = get_numeric_id(entry.get("target_draw_id"))
         
-        if valid_draws.empty:
-            continue # Result isn't out yet or no future draw found
+        if t_id_numeric is not None:
+            # Optimize: filter by numeric ID
+            match_rows = df[df['id'].apply(get_numeric_id) == t_id_numeric]
+            if not match_rows.empty:
+                target_draw = match_rows.iloc[0]
+        
+        # 2. HEALING LOGIC: If ID match failed or ID is missing, try to find the next draw in sequence
+        if target_draw is None:
+            p_time = pd.to_datetime(entry["timestamp"])
+            # For Bingo/Keno - strict sequence finding if no ID: 
+            # find first draw in history that occurs AFTER prediction time
+            # Note: Bingo/Keno data usually has date only, or simulated time.
+            # We look for the first draw whose date/time is >= prediction time.
             
-        target_draw = valid_draws.iloc[0]
-        actual_nums = sorted([int(n) for n in target_draw['result']])
+            # Since some data only has 'date', we prefer ID if it exists and just hasn't appeared yet.
+            # If we definitely don't have a valid target_id_numeric, we can't heal safely 
+            # without risking matching the wrong draw. 
+            pass # We wait for the ID to appear or be calculated.
+
+        if target_draw is None:
+            continue # Result isn't out yet
+            
+        actual_raw = target_draw['result']
+        # For Bingo18/Max3D, order might matter or user expects original. For others, sort for set-matching display.
+        if entry["product"] == "bingo18":
+            actual_nums = [int(n) for n in actual_raw]
+        else:
+            actual_nums = sorted([int(n) for n in actual_raw])
+
         draw_id = str(target_draw.get('id', 'N/A'))
         
         matches = []
         matches_detail = []
-        for pred in entry["predictions"]:
+        # Support legacy keys
+        preds = entry.get("predictions") or entry.get("tickets")
+        if not preds and "prediction" in entry:
+            preds = [entry["prediction"]]
+        
+        if not preds: continue
+
+        for pred in preds:
+            # Ensure pred is a list of integers
+            if isinstance(pred, str):
+                 try: pred = [int(s) for s in pred.split()]
+                 except: continue
+            if not isinstance(pred, list): continue
+
+            # For Bingo18, we highlight based on existence, but preserve order in display header
             matched_nums = sorted(list(set(pred) & set(actual_nums)))
             matches.append(len(matched_nums))
             matches_detail.append(matched_nums)
@@ -179,6 +292,13 @@ def check_audit_log(product_filter=None):
         entry["actual_draw_id"] = draw_id
         entry["match_count"] = matches
         entry["matches_detail"] = matches_detail
+        
+        # Special: Bingo 18 Tai/Xiu Audit
+        if entry["product"] == "bingo18":
+            actual_sum = sum(actual_nums)
+            actual_tx = "Tài" if actual_sum > 10 else "Xỉu"
+            entry["prediction_tx"] = actual_tx
+            
         changed = True
         new_matches += 1
 

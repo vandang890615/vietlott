@@ -33,7 +33,7 @@ class ProductPower655(BaseProduct):
         SiteId="main.frontend.vi",
         SiteAlias="main.vi",
         UserSessionId="",
-        SiteLang="en",
+        SiteLang="vi",
         IsPageDesign=False,
         ExtraParam1="",
         ExtraParam2="",
@@ -49,7 +49,7 @@ class ProductPower655(BaseProduct):
 
     org_body = RequestPower655(
         ORenderInfo=orender_info_default,
-        Key="23bbd667",
+        Key="1d5a1809",
         GameDrawId="",
         ArrayNumbers=[["" for _ in range(18)] for _ in range(5)],
         CheckMulti=False,

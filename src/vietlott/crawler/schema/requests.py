@@ -49,3 +49,24 @@ class Keno:
     TotalRow: int = field(default=10)
     UpperLower: int = field(default=2)
     number: str = field(default="")
+    
+@define
+class RequestMax3D:
+    ORenderInfo: ORenderInfoCls = field(default=ORenderInfoCls())
+    GameId: str = field(default="")
+    GameDrawId: str = field(default="")
+    number01: str = field(default="")
+    number02: str = field(default="")
+    CheckMulti: int = field(default=0)
+    PageIndex: int = field(default=1)
+
+@define
+class Bingo:
+    DrawDate: str = field(default="")
+    GameDrawNo: str = field(default="")
+    GameId: str = field(default="")
+    ORenderInfo: ORenderInfoCls = field(default=ORenderInfoCls())
+    PageIndex: int = field(default=1)
+    ProcessType: int = field(default=0)
+    TotalRow: int = field(default=10)
+    number: str = field(default="")

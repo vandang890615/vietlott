@@ -4,8 +4,8 @@ title Khởi chạy Vietlott AI Predictor Pro
 color 0B
 
 echo ═══════════════════════════════════════════════════════
-echo    🚀 VIETLOTT AI PREDICTOR PRO v10.8
-echo    Hệ thống dự đoán thông minh LSTM Deep Learning
+echo    🏆 VIETLOTT ULTRA PREDICTOR v4.0 (Hybrid + RE Bias)
+echo    Ensemble AI + Hot Zone + Coverage + Machine Bias Correction
 echo ═══════════════════════════════════════════════════════
 echo.
 

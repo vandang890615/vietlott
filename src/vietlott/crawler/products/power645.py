@@ -9,7 +9,7 @@ class ProductPower645(ProductPower655):
     # don't know why ArrayNumbers in 645 needs to be len 6 instead of 5 like in 655
     org_body = RequestPower655(
         ORenderInfo=ProductPower655.orender_info_default,
-        Key="7d861b77",  # DIFF
+        Key="90196521",  # Updated from 7d861b77
         GameDrawId="",
         ArrayNumbers=[["" for _ in range(18)] for _ in range(6)],  # DIFF
         CheckMulti=False,

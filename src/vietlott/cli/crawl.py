@@ -4,12 +4,16 @@ import pendulum
 import os, sys
 sys.path.append(os.path.dirname(os.path.abspath('src/vietlott')))
 from vietlott.config.products import product_config_map
-from vietlott.crawler.products import BaseProduct, ProductPower655, ProductPower645, ProductKeno
+from vietlott.crawler.products import BaseProduct, ProductPower655, ProductPower645, ProductKeno, ProductMax3D, ProductMax3DPro, ProductLotto, ProductBingo
 
 _map_class_name = {
     "keno": ProductKeno,
     "power_655": ProductPower655,
     "power_645": ProductPower645,
+    "max3d": ProductMax3D,
+    "max3d_pro": ProductMax3DPro,
+    "lotto": ProductLotto,
+    "bingo18": ProductBingo,
 }
 
 
