@@ -28,6 +28,16 @@ import sys
 from datetime import datetime
 from loguru import logger
 
+# Force UTF-8 encoding for standard output and error to avoid UnicodeEncodeError on Windows
+if sys.platform.startswith('win'):
+    import io
+    if hasattr(sys.stdout, 'reconfigure'):
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+            sys.stderr.reconfigure(encoding='utf-8')
+        except Exception:
+            pass
+
 # Suppress TF logs
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -342,7 +352,8 @@ class NumberScorer:
             # 2. Hot Bias (Vùng nóng) - Boost số máy quay "thích"
             hot_bias_nums = [22, 34, 9, 20, 8, 23, 3, 31, 1, 12]
             for num in hot_bias_nums:
-                scores[num] = min(1.0, scores[num] + 0.4)
+                if num in scores:
+                    scores[num] = min(1.0, scores[num] + 0.4)
                 
             # 3. Pair Bias Boost - Cặp số hay đi cùng nhau (từ RE)
             pair_boost = {
@@ -350,10 +361,10 @@ class NumberScorer:
                 11: 0.2, 22: 0.1, # Pair (11, 22)
             }
             for num, boost in pair_boost.items():
-                if scores[num] > 0: # Chỉ boost nếu không phải số chết
+                if num in scores and scores[num] > 0: # Chỉ boost nếu không phải số chết
                     scores[num] = min(1.0, scores[num] + boost)
                 
-        # MEGA 6/45 FAIRNESS
+        # MEGA 6/45 FAIRNESS / LOTTO / OTHER GAMES
         # Phát hiện từ RE: Máy quay Mega rất công bằng, không có dead zone
         else:
             for num in range(1, self.max_num + 1):
@@ -362,7 +373,8 @@ class NumberScorer:
             # Chỉ boost nhẹ các số hay ra vì bias vị trí (tự nhiên)
             pos_bias_nums = [1, 2, 4, 3, 5]
             for num in pos_bias_nums:
-                scores[num] = min(1.0, scores[num] + 0.1)
+                if num in scores:
+                    scores[num] = min(1.0, scores[num] + 0.1)
             
             # Cặp số hay đi cùng (từ RE)
             pair_boost = {
@@ -371,7 +383,8 @@ class NumberScorer:
                 24: 0.1, 37: 0.1
             }
             for num, boost in pair_boost.items():
-                scores[num] = min(1.0, scores[num] + boost)
+                if num in scores:
+                    scores[num] = min(1.0, scores[num] + boost)
                 
         return scores
     
@@ -1050,13 +1063,14 @@ class TicketOptimizer:
 # 4. MAIN ENTRY POINT
 # ═══════════════════════════════════════════════════
 
-def run_ultra_prediction(product_type: str = "power_645", use_ai: bool = True) -> Tuple[str, List[List[int]]]:
+def run_ultra_prediction(product_type: str = "power_645", use_ai: bool = True, gui_callback=None) -> Tuple[str, List[List[int]]]:
     """
     Chạy dự đoán ULTRA và trả về (report_string, tickets_list).
     
     Args:
-        product_type: "power_645" hoặc "power_655"
+        product_type: "power_645", "power_655", hoặc "lotto"
         use_ai: True để dùng Deep Learning ensemble, False chỉ dùng thống kê
+        gui_callback: Optional callback để log ra GUI
     
     Returns:
         (report: str, tickets: List[List[int]])
@@ -1064,9 +1078,16 @@ def run_ultra_prediction(product_type: str = "power_645", use_ai: bool = True) -
     import io
     from contextlib import redirect_stdout
     
-    max_num = 55 if "655" in product_type else 45
-    filename = "power655.jsonl" if "655" in product_type else "power645.jsonl"
-    prod_name = "POWER 6/55" if "655" in product_type else "MEGA 6/45"
+    # Dynamic config - hỗ trợ tất cả loại vé
+    _PROD_MAP = {
+        "power_645": {"max_num": 45, "filename": "power645.jsonl", "name": "MEGA 6/45"},
+        "power_655": {"max_num": 55, "filename": "power655.jsonl", "name": "POWER 6/55"},
+        "lotto":     {"max_num": 35, "filename": "lotto.jsonl",    "name": "LOTTO 6/36"},
+    }
+    _cfg = _PROD_MAP.get(product_type, _PROD_MAP["power_645"])
+    max_num  = _cfg["max_num"]
+    filename = _cfg["filename"]
+    prod_name = _cfg["name"]
     
     # Locate data file
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -1103,7 +1124,15 @@ def run_ultra_prediction(product_type: str = "power_645", use_ai: bool = True) -
                 try:
                     data = json.loads(line)
                     if 'result' in data:
-                        nums = sorted([int(n) for n in data['result']])[:6]
+                        raw = [int(n) for n in data['result']]
+                        if product_type == "power_655" and len(raw) >= 7:
+                            # Power 6/55: first 6 are main, 7th is bonus - only use main
+                            nums = sorted(raw[:6])
+                        elif product_type == "lotto" and len(raw) >= 6:
+                            # Lotto: first 5 are main, 6th is special - only use main
+                            nums = sorted(raw[:5])
+                        else:
+                            nums = sorted(raw)[:6]
                         draws.append(nums)
                 except Exception:
                     continue
@@ -1165,6 +1194,25 @@ def run_ultra_prediction(product_type: str = "power_645", use_ai: bool = True) -
         print("=" * 60)
     
     return f.getvalue(), tickets
+
+
+# ═══════════════════════════════════════════════════
+# 5. CLASS WRAPPER - Cho gui_app.py import & gọi
+# ═══════════════════════════════════════════════════
+
+class UltraPredictor:
+    """Wrapper class để gui_app.py có thể import và gọi theo OOP style."""
+    
+    def __init__(self, product_type: str = "power_645"):
+        self.product_type = product_type
+    
+    def run_ultra_prediction(self, use_ai: bool = True, gui_callback=None) -> Tuple[str, List[List[int]]]:
+        """Delegate tới module-level function."""
+        return run_ultra_prediction(
+            product_type=self.product_type,
+            use_ai=use_ai,
+            gui_callback=gui_callback
+        )
 
 
 # Direct run

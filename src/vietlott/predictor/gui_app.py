@@ -1,14 +1,49 @@
+import sys
+# Force UTF-8 encoding for standard output and error to avoid UnicodeEncodeError on Windows
+if sys.platform.startswith('win'):
+    import io
+    if hasattr(sys.stdout, 'reconfigure'):
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+            sys.stderr.reconfigure(encoding='utf-8')
+        except Exception:
+            pass
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
 import os
 import json
 import subprocess
-import sys
 import time
 from datetime import datetime, timedelta
+import hashlib
+import uuid
+import pandas as pd
+from collections import Counter
 
 # CORE v11.0 - ULTRA PREDICTOR ENGINE
+class SecurityManager:
+    @staticmethod
+    def get_hid():
+        """Generate a unique Hardware ID based on machine fingerprint"""
+        try:
+            # Combine machine name, node, and a stable UUID
+            uid = str(uuid.getnode())
+            name = os.environ.get('COMPUTERNAME', 'UNKNOWN')
+            raw = f"VIETLOTT-PRO-{uid}-{name}"
+            return hashlib.sha256(raw.encode()).hexdigest()[:16].upper()
+        except:
+            return "UNKNOWN-HID-888"
+
+    @staticmethod
+    def verify_key(hid, key):
+        """Verify if the key matches the HID using a secure salt"""
+        if not key: return False
+        salt = "ANTIGRAVITY_VIETLOTT_2026"
+        expected = hashlib.sha256(f"{hid}:{salt}".encode()).hexdigest()[:20].upper()
+        return key.strip().upper() == expected
+
 class VietlottGUI:
     def __init__(self, root):
         self.root = root
@@ -115,10 +150,18 @@ class VietlottGUI:
         self.marquee_running = False
         
         # STATUS BAR
+        self.is_licensed = False
+        self._check_license()
+
         s_bar = tk.Frame(root, height=30, bg="#111")
         s_bar.pack(side="bottom", fill="x")
+        self.license_status = tk.StringVar(value="Bản quyền: Đang kiểm tra...")
         tk.Label(s_bar, textvariable=self.status_var, font=("Segoe UI", 9), fg="#00fff2", bg="#111", anchor="w").pack(side="left", padx=10)
-        tk.Label(s_bar, text="v5.1.0 STABLE | Protected Mode: ON | CPU: Optimized", font=("Segoe UI", 8), fg="#666", bg="#111", anchor="e").pack(side="right", padx=10)
+        
+        l_lbl = tk.Label(s_bar, textvariable=self.license_status, font=("Segoe UI", 8, "bold"), bg="#111")
+        l_lbl.pack(side="right", padx=10)
+        
+        tk.Label(s_bar, text="v5.1.0 STABLE | Protected Mode: ON", font=("Segoe UI", 8), fg="#666", bg="#111", anchor="e").pack(side="right", padx=10)
 
         # Start background tasks
         self.start_timer_thread()
@@ -130,11 +173,68 @@ class VietlottGUI:
         self.root.after(1000, self.announce_today_games)
         
         self.log_to_terminal(">>> VIETLOTT AI KERNEL v5.0 INITIALIZED...")
-        self.log_to_terminal(">>> ALL ENGINES GO. WAITING FOR COMMANDS.", "success")
         
+        # LICENSE CHECK WARNING
+        if not self.is_licensed:
+            self.log_to_terminal("⚠️ CẢNH BÁO: PHẦN MỀM CHƯA KÍCH HOẠT BẢN QUYỀN!", "err")
+            self.license_status.set("❌ CHƯA KÍCH HOẠT")
+            l_lbl.config(fg="#ff4d4d")
+            self.root.after(2000, self.show_activation_dialog)
+        else:
+            self.log_to_terminal("✅ BẢN QUYỀN HỢP LỆ. DISABLE LIMITS.", "success")
+            self.license_status.set("💎 ĐÃ KÍCH HOẠT (PRO)")
+            l_lbl.config(fg="#00ff88")
+
         # KÍCH HOẠT REAL-TIME SYNC & STARTUP REPORT
         self.root.after(3000, lambda: self.update_data(silent=True))
         self.root.after(5000, self._render_performance_summary)
+
+    def _check_license(self):
+        hid = SecurityManager.get_hid()
+        path = os.path.join(os.getcwd(), "data", "license.key")
+        if os.path.exists(path):
+            with open(path, "r") as f: key = f.read().strip()
+            self.is_licensed = SecurityManager.verify_key(hid, key)
+        else:
+            self.is_licensed = False
+
+    def show_activation_dialog(self):
+        hid = SecurityManager.get_hid()
+        dialog = tk.Toplevel(self.root)
+        dialog.title("KÍCH HOẠT BẢN QUYỀN")
+        dialog.geometry("450x300")
+        dialog.configure(bg="#050510")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        tk.Label(dialog, text="🔑 KÍCH HOẠT PHẦM MỀM", font=("Arial", 14, "bold"), fg="#00fff2", bg="#050510").pack(pady=15)
+        
+        f = tk.Frame(dialog, bg="#111", padx=10, pady=10)
+        f.pack(fill="x", padx=20)
+        
+        tk.Label(f, text="MÃ PHẦN CỨNG (HID):", font=("Arial", 9), fg="#aaa", bg="#111").pack(anchor="w")
+        hid_entry = tk.Entry(f, font=("Consolas", 10, "bold"), bg="#000", fg="#ffff00", borderwidth=0)
+        hid_entry.insert(0, hid)
+        hid_entry.config(state="readonly")
+        hid_entry.pack(fill="x", pady=5)
+        
+        tk.Label(dialog, text="NHẬP MÃ KÍCH HOẠT (KEY):", font=("Arial", 9), fg="#aaa", bg="#050510").pack(anchor="w", padx=20, pady=(15, 0))
+        key_entry = tk.Entry(dialog, font=("Consolas", 11), bg="#1a1a2e", fg="#fff", insertbackground="#fff")
+        key_entry.pack(fill="x", padx=20, pady=5)
+        
+        def do_activate():
+            k = key_entry.get().strip()
+            if SecurityManager.verify_key(hid, k):
+                os.makedirs("data", exist_ok=True)
+                with open("data/license.key", "w") as f: f.write(k)
+                messagebox.showinfo("Thành công", "🎉 Kích hoạt bản quyền thành công! Vui lòng khởi động lại ứng dụng.")
+                dialog.destroy()
+                self.root.destroy()
+            else:
+                messagebox.showerror("Lỗi", "Mã kích hoạt không hợp lệ. Vui lòng kiểm tra lại!")
+
+        ttk.Button(dialog, text="KÍCH HOẠT NGAY", command=do_activate).pack(pady=20)
+        tk.Label(dialog, text="Gửi mã HID cho nhà phát triển để nhận Key.", font=("Arial", 8, "italic"), fg="#666", bg="#050510").pack()
 
     def log_to_terminal(self, msg, tag=None):
         ts = datetime.now().strftime("%H:%M:%S")
@@ -159,7 +259,7 @@ class VietlottGUI:
         c_hist.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         
         attr_hist = f"hist_{prod_code}"
-        txt_h = tk.Text(c_hist, font=("Consolas", 9), bg="#050510", fg="#aaa", borderwidth=0)
+        txt_h = tk.Text(c_hist, font=("Consolas", 9), bg="#050510", fg="#aaa", borderwidth=0, wrap="none")
         txt_h.pack(fill="both", expand=True, padx=5, pady=5)
         txt_h.insert(tk.END, "Đang tải dữ liệu...\n")
         setattr(self, attr_hist, txt_h)
@@ -192,8 +292,12 @@ class VietlottGUI:
         c_res = tk.LabelFrame(c_main, text=" 🎯 DỰ BÁO KỲ TIẾP THEO ", fg="#00ff88", bg="#000", font=("Arial", 11, "bold"))
         c_res.pack(fill="both", expand=True, pady=5)
         
-        txt_r = tk.Text(c_res, font=("Consolas", 12, "bold"), bg="#000", fg="#00ff88", borderwidth=0)
+        txt_r = tk.Text(c_res, font=("Consolas", 12, "bold"), bg="#000", fg="#00ff88", borderwidth=0, wrap="none")
         txt_r.pack(fill="both", expand=True, padx=10, pady=10)
+        txt_r.tag_configure("header", foreground="#ff00ff", font=("Consolas", 12, "bold"))
+        txt_r.tag_configure("success", foreground="#00ff88")
+        txt_r.tag_configure("info", foreground="#00e5ff")
+        txt_r.tag_configure("warn", foreground="#ffea00")
         txt_r.insert(tk.END, "--- CHƯA CÓ DỰ BÁO ---\nNhấn 'Chốt Số AI' để bắt đầu.")
         setattr(self, f"res_{prod_code}", txt_r)
         
@@ -224,10 +328,11 @@ class VietlottGUI:
         setattr(self, f"audit_list_{prod_code}", lst_a)
         
         # Detail Viewer
-        txt_ad = tk.Text(c_audit, font=("Consolas", 8), bg="#000", fg="#ccc", borderwidth=0, height=10 if prod_code != "keno" else 5)
+        txt_ad = tk.Text(c_audit, font=("Consolas", 8), bg="#000", fg="#ccc", borderwidth=0, height=10 if prod_code != "keno" else 5, wrap="none")
         txt_ad.pack(fill="both", expand=True, padx=2, pady=2)
         txt_ad.tag_configure("header", foreground="#ff00ff", font=("Consolas", 8, "bold"))
         txt_ad.tag_configure("success", foreground="#00ff88"); txt_ad.tag_configure("match", background="#004400", foreground="#00ff88", font=("Consolas", 8, "bold"))
+        txt_ad.tag_configure("bonus", background="#550000", foreground="#ffea00", font=("Consolas", 8, "bold")) # Red background, yellow text for bonus
         setattr(self, f"audit_detail_{prod_code}", txt_ad)
         
         # Bind selection
@@ -262,29 +367,75 @@ class VietlottGUI:
             
             if entry.get('checked'):
                 actual = entry.get('actual_result', [])
-                actual_ints = [int(n) for n in actual]
+                try: actual_ints = [int(n) for n in actual if str(n).isdigit()]
+                except: actual_ints = []
+                
                 txt.insert(tk.END, f"✅ KẾT QUẢ: ", "success")
                 
                 if "bingo" in prod: 
                     res_fmt = "-".join(map(str, actual))
                     actual_sum = sum(actual_ints)
-                    tx = "TÀI" if actual_sum > 10 else "XỈU"
+                    if 3 <= actual_sum <= 9: tx = "NHỎ"
+                    elif 10 <= actual_sum <= 11: tx = "HÒA"
+                    else: tx = "LỚN"
                     txt.insert(tk.END, res_fmt + f" ({tx} {actual_sum})\n")
                 else: 
-                    res_fmt = " ".join([f"{int(n):02d}" for n in actual])
-                    txt.insert(tk.END, res_fmt + "\n")
+                    bonus_val = entry.get('bonus_number')
+                    if (prod == "power_655" or prod == "power655") and len(actual) == 7:
+                        main_nums = " ".join([f"{int(n):02d}" for n in sorted(actual[:6])])
+                        b_num = bonus_val if bonus_val is not None else actual[6]
+                        txt.insert(tk.END, main_nums + " | ")
+                        txt.insert(tk.END, f" {int(b_num):02d} ", "bonus")
+                        txt.insert(tk.END, " (Cầu Đỏ)\n")
+                    elif prod == "lotto" and len(actual) == 6:
+                        main_nums = " ".join([f"{int(n):02d}" for n in sorted(actual[:5])])
+                        s_num = bonus_val if bonus_val is not None else actual[5]
+                        txt.insert(tk.END, main_nums + " | ")
+                        txt.insert(tk.END, f" {int(s_num):02d} ", "bonus")
+                        txt.insert(tk.END, " (Số ĐB)\n")
+                    else:
+                        res_fmt = " ".join([f"{int(n):02d}" for n in actual])
+                        txt.insert(tk.END, res_fmt + "\n")
                 
                 tickets = entry.get('tickets') or entry.get('predictions', []) or [entry.get('prediction')]
                 match_counts = entry.get('match_count', [0]*len(tickets))
+                any_matches = entry.get('any_matches_count', match_counts) # Fallback for old logs
                 
                 for i, t in enumerate(tickets):
                     txt.insert(tk.END, f" #{i+1:02d}: ")
                     if isinstance(t, (list, tuple)):
-                        for n in sorted(t):
-                             n_int = int(n)
-                             if n_int in actual_ints: txt.insert(tk.END, f"{n_int:02d} ", "match")
-                             else: txt.insert(tk.END, f"{n_int:02d} ")
-                        txt.insert(tk.END, f" ({match_counts[i]})\n")
+                        # If Bingo: original order + positional highlight
+                        if "bingo" in prod:
+                            for idx, n in enumerate(t):
+                                n_int = int(n)
+                                is_match = idx < len(actual_ints) and n_int == actual_ints[idx]
+                                if is_match: txt.insert(tk.END, f"{n_int} ", "match")
+                                else: txt.insert(tk.END, f"{n_int} ")
+                            # Show Dual Stats for Bingo
+                            txt.insert(tk.END, f" ({match_counts[i]} vị trí | {any_matches[i]} trùng số)\n")
+                        else:
+                            # Other games: sorted + set-based highlight
+                            is_power = (prod == "power_655" or prod == "power655") and len(actual_ints) == 7
+                            is_lotto = prod == "lotto" and len(actual_ints) == 6
+                            bonus_val = entry.get('bonus_number')
+                            
+                            if is_power:
+                                main_actual = actual_ints[:6]
+                            elif is_lotto:
+                                main_actual = actual_ints[:5]
+                            else:
+                                main_actual = actual_ints
+                                bonus_val = None
+                            
+                            for n in sorted(t):
+                                 n_int = int(n)
+                                 if n_int in main_actual:
+                                     txt.insert(tk.END, f"{n_int:02d} ", "match")
+                                 elif bonus_val is not None and n_int == int(bonus_val):
+                                     txt.insert(tk.END, f"{n_int:02d} ", "bonus")
+                                 else:
+                                     txt.insert(tk.END, f"{n_int:02d} ")
+                            txt.insert(tk.END, f" ({match_counts[i]})\n")
                     else: txt.insert(tk.END, f"{t}\n")
             else:
                 txt.insert(tk.END, "\n⏳ TRẠNG THÁI: CHỜ QUAY THƯỞNG...\n")
@@ -315,8 +466,39 @@ class VietlottGUI:
         info_val.pack(pady=(0,5))
         setattr(self, f"lbl_info_{prod}", info_val)
 
+        if prod == "bingo18":
+            tk.Label(f, text="📈 XU HƯỚNG NHỎ/HÒA/LỚN (15 kỳ)", font=("Arial", 7, "bold"), fg="#555", bg="#1a1a2e").pack()
+            cv = tk.Canvas(f, width=280, height=40, bg="#000", highlightthickness=0)
+            cv.pack(padx=10, pady=5)
+            setattr(self, f"canvas_trend_{prod}", cv)
+
     def predict_mega(self):
         self.start_prediction("power_645")
+
+    def _draw_bingo_trend(self, trend):
+        cv = getattr(self, "canvas_trend_bingo18", None)
+        if not cv: return
+        cv.delete("all")
+        if not trend: return
+        
+        w = 280; h = 40; count = len(trend)
+        dx = w / (count + 1)
+        
+        for i, val in enumerate(trend):
+            x = (i + 1) * dx
+            # val: 0=Nho (cyan), 1=Hoa (yellow), 2=Lon (magenta)
+            color = "#00e5ff" if val == 0 else "#ffea00" if val == 1 else "#ff00ff"
+            # Vertical positions: 10 (Lon), 20 (Hoa), 30 (Nho)
+            y = 30 if val == 0 else 20 if val == 1 else 10
+            
+            # Draw shadow/glow
+            cv.create_oval(x-3, y-3, x+3, y+3, fill=color, outline="#fff", width=1)
+            
+            if i > 0:
+                prev_val = trend[i-1]
+                px = i * dx
+                py = 30 if prev_val == 0 else 20 if prev_val == 1 else 10
+                cv.create_line(px, py, x, y, fill="#333", width=1)
 
     def predict_power(self):
         self.start_prediction("power_655")
@@ -332,7 +514,7 @@ class VietlottGUI:
         # 1. Global Log
         c_log = tk.LabelFrame(frame, text=" 💾 GLOBAL SYSTEM LOG ", fg="#00ff00", bg="#000", font=("Consolas", 10, "bold"))
         c_log.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-        self.terminal = tk.Text(c_log, font=("Consolas", 9), bg="#000", fg="#00ff00", borderwidth=0)
+        self.terminal = tk.Text(c_log, font=("Consolas", 9), bg="#000", fg="#00ff00", borderwidth=0, wrap="none")
         self.terminal.pack(fill="both", expand=True)
         self.terminal.tag_configure("info", foreground="#00e5ff"); self.terminal.tag_configure("warn", foreground="#ffff00"); self.terminal.tag_configure("err", foreground="#ff4d4d"); self.terminal.tag_configure("success", foreground="#00ff88")
 
@@ -355,7 +537,7 @@ class VietlottGUI:
         self.btn_bias = ttk.Button(c_tool, text="🧬 PHÂN TÍCH BIAS HỆ THỐNG", command=self.run_bias_analysis)
         self.btn_bias.pack(fill="x", pady=5)
         
-        self.hist_text = tk.Text(c_tool, font=("Consolas", 9), bg="#050510", fg="#aaa", height=10, borderwidth=0)
+        self.hist_text = tk.Text(c_tool, font=("Consolas", 9), bg="#050510", fg="#aaa", height=10, borderwidth=0, wrap="none")
         self.hist_text.pack(fill="both", expand=True, padx=5, pady=5)
         self.hist_text.insert(tk.END, ">>> SYSTEM READY.\n")
 
@@ -367,11 +549,12 @@ class VietlottGUI:
         self.full_audit_list.pack(fill="x")
         self.full_audit_list.bind("<<ListboxSelect>>", self.on_select_audit_full)
         
-        self.audit_detail = tk.Text(c_audit, bg="#000", fg="#ccc", font=("Consolas", 9), borderwidth=0, padx=5, pady=5)
+        self.audit_detail = tk.Text(c_audit, bg="#000", fg="#ccc", font=("Consolas", 9), borderwidth=0, padx=5, pady=5, wrap="none")
         self.audit_detail.pack(fill="both", expand=True)
         self.audit_detail.tag_configure("header", foreground="#ff00ff", font=("Consolas", 10, "bold"))
         self.audit_detail.tag_configure("success", foreground="#00ff88", font=("Consolas", 9, "bold"))
         self.audit_detail.tag_configure("match", background="#004400", foreground="#00ff88", font=("Consolas", 9, "bold"))
+        self.audit_detail.tag_configure("bonus", background="#550000", foreground="#ffea00", font=("Consolas", 9, "bold")) # Red background, yellow text for bonus
 
     def on_select_audit_full(self, event):
         sel = self.full_audit_list.curselection()
@@ -398,14 +581,31 @@ class VietlottGUI:
                 if "bingo" in prod.lower(): 
                     res_fmt = "-".join(map(str, actual))
                     actual_sum = sum([int(n) for n in actual])
-                    tx = "TÀI" if actual_sum > 10 else "XỈU"
+                    if 3 <= actual_sum <= 9: tx = "NHỎ"
+                    elif 10 <= actual_sum <= 11: tx = "HÒA"
+                    else: tx = "LỚN"
                     self.audit_detail.insert(tk.END, res_fmt + f" ({tx} {actual_sum})\n\n")
                 else: 
-                    res_fmt = " ".join([f"{n:02d}" for n in actual])
-                    self.audit_detail.insert(tk.END, res_fmt + "\n\n")
+                    bonus_val = entry.get('bonus_number')
+                    if ("power655" in prod.lower() or "power_655" in prod.lower()) and len(actual) == 7:
+                        main_nums = " ".join([f"{int(n):02d}" for n in sorted(actual[:6])])
+                        b_num = bonus_val if bonus_val is not None else actual[6]
+                        self.audit_detail.insert(tk.END, main_nums + " | ")
+                        self.audit_detail.insert(tk.END, f" {int(b_num):02d} ", "bonus")
+                        self.audit_detail.insert(tk.END, " (Cầu Đỏ)\n\n")
+                    elif "lotto" in prod.lower() and len(actual) == 6:
+                        main_nums = " ".join([f"{int(n):02d}" for n in sorted(actual[:5])])
+                        s_num = bonus_val if bonus_val is not None else actual[5]
+                        self.audit_detail.insert(tk.END, main_nums + " | ")
+                        self.audit_detail.insert(tk.END, f" {int(s_num):02d} ", "bonus")
+                        self.audit_detail.insert(tk.END, " (Số ĐB)\n\n")
+                    else:
+                        res_fmt = " ".join([f"{int(n):02d}" for n in actual])
+                        self.audit_detail.insert(tk.END, res_fmt + "\n\n")
                 
                 tickets = entry.get('tickets') or entry.get('predictions', []) or [entry.get('prediction')]
                 match_counts = entry.get('match_count', [0]*len(tickets))
+                any_matches = entry.get('any_matches_count', match_counts)
                 
                 for i, t in enumerate(tickets):
                     if not isinstance(t, (list, tuple)):
@@ -413,11 +613,41 @@ class VietlottGUI:
                         continue
                         
                     self.audit_detail.insert(tk.END, f" Vé {i+1:02d}: ")
-                    for n in sorted(t):
-                         n_int = int(n)
-                         if n_int in actual: self.audit_detail.insert(tk.END, f"{n_int:02d} ", "match")
-                         else: self.audit_detail.insert(tk.END, f"{n_int:02d} ")
-                    self.audit_detail.insert(tk.END, f"({match_counts[i]} số)\n")
+                    
+                    if "bingo" in prod.lower():
+                        # Positional Highlight (No sorting, No leading zeros)
+                        for idx, n in enumerate(t):
+                            n_int = int(n)
+                            is_match = idx < len(actual) and n_int == int(actual[idx])
+                            if is_match: self.audit_detail.insert(tk.END, f"{n_int} ", "match")
+                            else: self.audit_detail.insert(tk.END, f"{n_int} ")
+                        # Show Dual Stats in Full View
+                        self.audit_detail.insert(tk.END, f"({match_counts[i]} vị trí | {any_matches[i]} trùng 1 số)\n")
+                    else:
+                        # Set-based Highlight (Sorted, Leading zeros)
+                        is_power = ("power655" in prod.lower() or "power_655" in prod.lower()) and len(actual) == 7
+                        is_lotto = "lotto" in prod.lower() and len(actual) == 6
+                        bonus_val = entry.get('bonus_number')
+                        try: actual_ints = [int(n) for n in actual]
+                        except: actual_ints = []
+                        
+                        if is_power:
+                            main_actual = actual_ints[:6]
+                        elif is_lotto:
+                            main_actual = actual_ints[:5]
+                        else:
+                            main_actual = actual_ints
+                            bonus_val = None
+                        
+                        for n in sorted(t):
+                             n_int = int(n)
+                             if n_int in main_actual:
+                                 self.audit_detail.insert(tk.END, f"{n_int:02d} ", "match")
+                             elif bonus_val is not None and n_int == int(bonus_val):
+                                 self.audit_detail.insert(tk.END, f"{n_int:02d} ", "bonus")
+                             else:
+                                 self.audit_detail.insert(tk.END, f"{n_int:02d} ")
+                        self.audit_detail.insert(tk.END, f"({match_counts[i]} số)\n")
             else:
                 self.audit_detail.insert(tk.END, "\n⏳ TRẠNG THÁI: ĐANG CHỜ QUAY THƯỞNG...\n")
                 self.audit_detail.insert(tk.END, "Vui lòng 'Cập nhật kết quả mới' sau giờ quay để đối soát.\n\n")
@@ -591,6 +821,16 @@ class VietlottGUI:
                                         if len(s) > 30: s = s[:27] + "..."
                                     elif "bingo" in key_attr:
                                         s = "-".join(map(str, res))
+                                    elif key_attr == "power_655" and len(res) >= 7:
+                                        # Power 6/55: 6 main + Cầu Đỏ (bonus)
+                                        main = " ".join([f"{int(n):02d}" for n in sorted(res[:6])])
+                                        bonus = f"{int(res[6]):02d}"
+                                        s = f"{main} | {bonus}"
+                                    elif key_attr == "lotto" and len(res) >= 6:
+                                        # Lotto: 5 main + Số Đặc Biệt
+                                        main = " ".join([f"{int(n):02d}" for n in sorted(res[:5])])
+                                        special = f"{int(res[5]):02d}"
+                                        s = f"{main} | {special}"
                                     else:
                                         s = " ".join([f"{int(n):02d}" for n in sorted(res)])
                                         
@@ -671,28 +911,46 @@ class VietlottGUI:
                         if not d_id.startswith('#'): d_id = f"#{d_id}"
                     
                     status = "✅" if checked else "⏳"
-                    max_m = max(e.get('match_count', [0])) if checked else 0
-                    res_txt = f"{max_m}s" if checked and max_m > 0 else "Lo" if checked else "Wait"
-                    audit_list.insert(tk.END, f" {status} {d_id[:12]: <12} | {res_txt: <4}")
+                    m_list = e.get('match_count', [0])
+                    max_m = max(m_list) if m_list else 0
+                    
+                    if checked and attr_key == "bingo18":
+                        a_list = e.get('any_matches_count', [0])
+                        max_a = max(a_list) if a_list else 0
+                        res_txt = f"P:{max_m} A:{max_a}" if (max_m > 0 or max_a > 0) else "Lo"
+                    else:
+                        res_txt = f"{max_m}s" if checked and max_m > 0 else "Lo" if checked else "Wait"
+                        
+                    audit_list.insert(tk.END, f" {status} {d_id[:12]: <12} | {res_txt}")
 
-            # Update Latest Result Box remains same logic
+            # Update Latest Result Box (Avoid clobbering Advanced Strategy view)
             if res_box:
-                active = next((e for e in logs if not e.get('checked')), None)
-                content = ""
-                if active:
-                    t_id = active.get('target_draw_id', '?')
-                    ts = (active.get('timestamp') or active.get('date', '?'))[5:16]
-                    content += f"💎 ĐANG CHỜ KỲ {t_id} ({ts}):\n"
-                    tickets = active.get('tickets') or active.get('predictions') or []
-                    for i, t in enumerate(tickets):
-                        t_val = t
-                        if isinstance(t, list): 
-                            if "bingo" in attr_key: t_val = "-".join(map(str, t))
-                            else: t_val = " ".join([f"{int(n):02d}" for n in sorted(t)])
-                        content += f" #{i+1:02d}: {t_val}\n"
-                else:
-                    content = "\n🎯 SẴN SÀNG DỰ BÁO.\nNhấn nút SOI CẦU để bắt đầu."
-                self._safe_update_text(res_box, content)
+                try:
+                    current_text = res_box.get("1.0", tk.END)
+                    # If we have advanced info (Radar/Hunter/Kèo/Chiến thuật), don't let standard logic overwrite it
+                    if "RADAR" in current_text or "KÈO" in current_text or "🎯 Mục tiêu" in current_text or "CHIẾN THUẬT" in current_text:
+                        pass # Keep the advanced view
+                    else:
+                        active = next((e for e in logs if not e.get('checked')), None)
+                        content = ""
+                        if active:
+                            t_id = active.get('target_draw_id', '?')
+                            ts = (active.get('timestamp') or active.get('date', '?'))[5:16]
+                            content += f"💎 ĐANG CHỜ KỲ {t_id} ({ts}):\n"
+                            tickets = active.get('tickets') or active.get('predictions') or []
+                            for i, t in enumerate(tickets):
+                                t_val = t
+                                if isinstance(t, list): 
+                                    if "bingo" in attr_key: t_val = "-".join(map(str, t))
+                                    else: t_val = " ".join([f"{int(n):02d}" for n in sorted(t)])
+                                if i == 0 and not "bingo" in attr_key:
+                                    content += f" ⭐ VÉ VIP #{i+1:02d} (Xác suất cao nhất): {t_val}\n"
+                                else:
+                                    content += f" #{i+1:02d}: {t_val}\n"
+                        else:
+                            content = "\n🎯 SẴN SÀNG DỰ BÁO.\nNhấn nút SOI CẦU để bắt đầu."
+                        self._safe_update_text(res_box, content)
+                except: pass
 
             # Update Win Rate Card
             try:
@@ -700,11 +958,18 @@ class VietlottGUI:
                 if not stats and pk != attr_key: stats = get_detailed_stats(pk)
                 if stats and lbl_rate:
                     wr = stats.get('win_rate', 0)
-                    wins = stats.get('wins', 0); total = stats.get('total_tickets', 0)
                     color = "#00ff88" if wr >= 10 else "#ffcc00" if wr > 0 else "#ff4d4d"
                     lbl_rate.config(text=f"{wr}%", fg=color)
-                    lbl_info.config(text=f"{wins}/{total} vé thắng")
-            except: pass
+                    
+                    if attr_key == "bingo18":
+                        pwr = stats.get('p_win_rate', 0)
+                        lbl_info.config(text=f"Trúng số: {wr}% | Vị trí: {pwr}%", font=("Arial", 7))
+                        self._draw_bingo_trend(stats.get('trend', []))
+                    else:
+                        wins = stats.get('wins', 0); total = stats.get('total_tickets', 0)
+                        lbl_info.config(text=f"{wins}/{total} vé thắng")
+            except Exception as e:
+                print(f"Stats error for {attr_key}: {e}")
 
         # Update Marquee & Global Audit
         msg_list = []
@@ -728,9 +993,9 @@ class VietlottGUI:
 
     def _render_performance_summary(self):
         """Prints a consolidated system summary to the global log"""
-        self.log_to_terminal("╔══════════════════════════════════════════════════════════════════════╗", "header")
-        self.log_to_terminal("║              🚀  VIETLOTT AI SYSTEM SUMMARY v6.0  🚀              ║", "header")
-        self.log_to_terminal("╚══════════════════════════════════════════════════════════════════════╝", "header")
+        self.log_to_terminal("════════════════════════════════════════════════════════════════════════", "header")
+        self.log_to_terminal("                🚀  VIETLOTT AI SYSTEM SUMMARY v6.0  🚀", "header")
+        self.log_to_terminal("════════════════════════════════════════════════════════════════════════", "header")
         
         prods = [
             ("power_655", "P.6/55"), ("power_645", "M.6/45"),
@@ -741,12 +1006,32 @@ class VietlottGUI:
         from lstm_predictor import get_detailed_stats
         for pk, short_name in prods:
             stats = get_detailed_stats(pk)
-            wr = stats.get('win_rate', 0) if stats else 0
-            total = stats.get('total_tickets', 0) if stats else 0
+            if not stats:
+                self.log_to_terminal(f"   > {short_name: <10} | Chưa có dữ liệu đối soát.", "warn")
+                continue
+                
+            wr = stats.get('win_rate', 0)
+            total_draws = stats.get('total_draws', 0)
+            total_tickets = stats.get('total_tickets', 0)
+            dist = stats.get('distribution', {})
+            
+            # Find the two highest match counts with count > 0
+            hits = sorted([k for k, v in dist.items() if k > 0 and v > 0], reverse=True)
+            best_str = "Trúng tối đa: Chưa có"
+            if len(hits) >= 1:
+                k1 = hits[0]
+                v1 = dist[k1]
+                if len(hits) >= 2:
+                    k2 = hits[1]
+                    v2 = dist[k2]
+                    best_str = f"Trúng tối đa: {k1} số ({v1} lần) | Cao tiếp: {k2} số ({v2} lần)"
+                else:
+                    best_str = f"Trúng tối đa: {k1} số ({v1} lần)"
             
             tag = "success" if wr > 10 else "info" if wr > 0 else "warn"
-            row = f"   > {short_name: <10} | Win: {wr: >5}% | Total Sync: {total: >5} tickets"
+            row = f"   > {short_name: <10} | Kỳ đối soát: {total_draws: >3} kỳ | Win: {wr: >5}% | Tổng vé: {total_tickets: >4}"
             self.log_to_terminal(row, tag)
+            self.log_to_terminal(f"     └─ {best_str}", "info")
             
         self.log_to_terminal("────────────────────────────────────────────────────────────────────────", "info")
         self.log_to_terminal("   AI STATUS: HEURISTIC ENGINE ONLINE | BIAS PROTECTOR ACTIVE", "success")
@@ -763,6 +1048,11 @@ class VietlottGUI:
         threading.Thread(target=_task).start()
 
     def start_prediction(self, prod):
+        if not self.is_licensed:
+            messagebox.showwarning("Bản quyền", "Vui lòng kích hoạt bản quyền PRO để sử dụng tính năng AI Deep Learning.")
+            self.show_activation_dialog()
+            return
+            
         if self.is_busy: return
         self.is_busy = True
         self.log_to_terminal(f">>> STARTING PREDICTION FOR {prod.upper()}...", "info")
@@ -806,8 +1096,11 @@ class VietlottGUI:
                 log_path = os.path.join(os.getcwd(), "data", "audit_log.json")
                 if os.path.exists(log_path):
                     with open(log_path, "r", encoding="utf-8") as f: a_data = json.load(f)
-                    if any(x.get('product') == prod and str(x.get('target_draw_id')) == target_id for x in a_data):
-                        self.log_to_terminal(f"⚠️ Đã có dự báo cho {prod.upper()} kỳ {target_id}. Không chốt trùng.", "warn")
+                    existing = next((x for x in a_data if x.get('product') == prod and str(x.get('target_draw_id')) == target_id), None)
+                    if existing:
+                        self.log_to_terminal(f"⚠️ Đã có dự báo cho {prod.upper()} kỳ {target_id}. Đang hiển thị lại...", "warn")
+                        tickets = existing.get('tickets') or existing.get('predictions') or []
+                        self.root.after(0, lambda p=prod, t=tickets, df_c=df: self._update_bingo_ui_detailed(p, t, df_c))
                         self.root.after(0, lambda: self.status_var.set(f"✅ Đã có vé kỳ {target_id}"))
                         return
 
@@ -816,15 +1109,28 @@ class VietlottGUI:
                 max_n = conf.max_value
                 output_n = conf.size_output
                 
-                p = LSTMPredictor(window_size=15, max_num=max_n)
+                # Determine Mode and Slots
+                mode = "standard"
+                slots = output_n
+                win_size = 15
+                train_epochs = 30
+                
+                if "bingo" in prod or "max3d" in prod:
+                    mode = "positional"
+                    slots = output_n
+                    win_size = 25 # Larger window for patterns
+                    train_epochs = 50 # More intensive training
+                    self.log_to_terminal(f">>> ACTIVATING POSITIONAL NEURAL CORE (Slots: {slots})...", "warn")
+                
+                p = LSTMPredictor(window_size=win_size, max_num=max_n, mode=mode, slots=slots)
                 d = p.prepare_data(df)
                 X, y = p.create_sequences(d)
                 p.build_model(input_shape=(X.shape[1], X.shape[2]))
                 
                 # Training
-                self.log_to_terminal(f">>> STARTING DEEP LEARNING TRAINING FOR {prod.upper()}...", "warn")
-                self.root.after(0, lambda: self.status_var.set(f"🧠 Đang huấn luyện AI (30 epochs)..."))
-                p.train(X, y, epochs=30)
+                self.log_to_terminal(f">>> STARTING DEEP LEARNING ({train_epochs} Epochs) FOR {prod.upper()}...", "warn")
+                self.root.after(0, lambda: self.status_var.set(f"🧠 Đang huấn luyện AI ({train_epochs} epochs)..."))
+                p.train(X, y, epochs=train_epochs)
                 self.log_to_terminal(f">>> TRAINING COMPLETE. OPTIMIZING PREDICTIONS...", "success")
                 
                 # Dự đoán với Quantum-Inspired Diversity Filter (AI + Diversity Optimization)
@@ -832,6 +1138,9 @@ class VietlottGUI:
                     self.log_to_terminal(">>> ACTIVATING ULTRA-COVERAGE MODE FOR LOTTO (35-NUM MANIFOLD)...", "warn")
                     # Tăng trọng số đa dạng lên 0.9 để phủ kín 35 số của Lotto
                     tickets = p.predict_diverse_batch(d[-p.window_size:], df_context=df, batch_size=10, count=output_n, diversity_weight=0.9)
+                elif mode == "positional":
+                    self.log_to_terminal(f">>> RUNNING POSITIONAL INFERENCE + QUANTUM FILTER...", "info")
+                    tickets = p.predict_diverse_batch(d[-p.window_size:], df_context=df, batch_size=10, count=output_n, diversity_weight=0.4)
                 else:
                     self.log_to_terminal(">>> RUNNING ENSEMBLE INFERENCE + QUANTUM DIVERSITY FILTER...", "info")
                     tickets = p.predict_diverse_batch(d[-p.window_size:], df_context=df, batch_size=10, count=output_n, diversity_weight=0.6)
@@ -844,9 +1153,8 @@ class VietlottGUI:
                     log_predictions(prod, tickets, target_draw_id=target_id)
                     self.log_to_terminal(f">>> AUTO-SAVED PREDICTIONS FOR KỲ {target_id}.", "success")
                 
-                # Cập nhật UI
-                self.root.after(0, self.refresh_ui_data)
-                self.root.after(0, lambda: self.status_var.set("✅ Đã hoàn thành dự báo mới!"))
+                # Cập nhật UI chuyên sâu
+                self.root.after(0, lambda p=prod, t=tickets, df_c=df: self._update_bingo_ui_detailed(p, t, df_c))
                 
             except Exception as e:
                 error_msg = f"❌ Lỗi khi soi cầu:\n\n{type(e).__name__}: {str(e)}"
@@ -858,6 +1166,113 @@ class VietlottGUI:
                 
         threading.Thread(target=_p, daemon=True).start()
 
+
+    def _update_bingo_ui_detailed(self, prod, tickets, df_context):
+        """Unified Strategy Dashboard: Detailed for Bingo, Standard for others"""
+        try:
+            self.refresh_ui_data()
+            self.status_var.set("✅ Cập nhật kết quả mới!")
+            
+            res_box = getattr(self, f"res_{prod}", None)
+            if not res_box: return
+            
+            res_box.config(state="normal")
+            res_box.delete("1.0", tk.END)
+            
+            if not tickets:
+                res_box.insert(tk.END, "⚠️ Chưa có dữ liệu dự báo cho kỳ này.\n")
+                res_box.config(state="disabled")
+                return
+
+            self.log_to_terminal(f">>> UI SYNC: Rendering detailed strategy for {prod.upper()}...", "info")
+            if prod == "bingo18":
+                try:
+                    all_sums = [sum([int(n) for n in t]) for t in tickets]
+                    cats = ["NHỎ (3-9)" if s <= 9 else "HÒA (10-11)" if s <= 11 else "LỚN (12-18)" for s in all_sums]
+                    counts = Counter(cats)
+                    main_cat, votes = counts.most_common(1)[0]
+                    confidence = int((votes / len(tickets)) * 100)
+                    
+                    res_box.insert(tk.END, "💎 AI TƯ VẤN BINGO 18 (CHIẾN THUẬT VÀNG)\n", "header")
+                    res_box.insert(tk.END, f"📊 Độ tin cậy: {confidence}% | Phân tích 2000 kỳ gần nhất\n")
+                    res_box.insert(tk.END, "------------------------------------------\n\n")
+                    res_box.insert(tk.END, "🎯 1. KÈO THƠM (Nên đánh chính):\n", "header")
+                    res_box.insert(tk.END, f" 👉 LỰA CHỌN: {main_cat.upper()}\n", "success")
+                    res_box.insert(tk.END, f" 🔥 HÀNH ĐỘNG: Bấm vào ô '{main_cat[:4]}' ngay.\n\n", "info")
+                    res_box.insert(tk.END, "🌈 2. KÈO ĂN ĐẬM (Lót Tổng chính xác):\n", "header")
+                    cat_sums = [s for s in all_sums if ("NHỎ (3-9)" if s <= 9 else "HÒA (10-11)" if s <= 11 else "LỚN (12-18)") == main_cat]
+                    if cat_sums:
+                        top_s = Counter(cat_sums).most_common(2)
+                        for s_val, _ in top_s:
+                            odd = {3:120, 4:40, 5:20, 6:12, 7:8, 8:5.5, 9:4.7, 10:4.4, 11:4.4, 12:4.7, 13:5.5, 14:8, 15:12, 16:20, 17:40, 18:120}.get(s_val, "?")
+                            res_box.insert(tk.END, f" 👉 Tổng {s_val}: Ăn x{odd}\n")
+                    res_box.insert(tk.END, " 🔥 HÀNH ĐỘNG: Đánh thêm tiền lẻ vào ô Tổng này.\n\n", "info")
+                    res_box.insert(tk.END, "🎡 3. SỐ VÀNG (Dễ trúng nhất):\n", "header")
+                    flats = [int(n) for t in tickets for n in t]
+                    hot = [str(x[0]) for x in Counter(flats).most_common(2)]
+                    res_box.insert(tk.END, f" 👉 Chốt Số: {', '.join(hot)}\n", "success")
+                    res_box.insert(tk.END, f" 🔥 HÀNH ĐỘNG: Đánh ô 'Trùng 1 số' cho số {', '.join(hot)}.\n\n", "info")
+                    res_box.insert(tk.END, "💎 4. SĂN HŨ (Nuôi bộ ba giống nhau):\n", "header")
+                    try:
+                        all_triples = [[i,i,i] for i in range(1,7)]
+                        df_c = df_context.copy()
+                        df_c['id_num'] = pd.to_numeric(df_c['id'].astype(str).str.replace('#', '').str.strip(), errors='coerce')
+                        latest = df_c.dropna(subset=['id_num', 'result']).sort_values(by="id_num", ascending=False).head(2000)
+                        gaps = {}
+                        for tr in all_triples:
+                            gap = 500
+                            for idx, r in enumerate(latest['result']):
+                                if isinstance(r, (list, tuple)) and list(r) == tr: gap = idx; break
+                            gaps[tuple(tr)] = gap
+                        target = max(gaps, key=gaps.get)
+                        res_box.insert(tk.END, f" 👉 Mục tiêu: {target[0]}-{target[1]}-{target[2]}\n")
+                        res_box.insert(tk.END, f" 👉 Đã {gaps[target]} kỳ chưa về. ")
+                        if gaps[target] > 250: res_box.insert(tk.END, "🔥 CỰC GAN - NÊN NUÔI!", "success")
+                        res_box.insert(tk.END, "\n")
+                    except: res_box.insert(tk.END, " 👉 Đang đồng bộ tín hiệu săn hũ...\n")
+                    res_box.insert(tk.END, "\n💡 Mẹo: Đánh kèo Chính để giữ vốn, lót kèo Tổng & Số để lấy lãi.", "warn")
+                except Exception as e:
+                    self.log_to_terminal(f"⚠️ Logic Error Bingo: {str(e)}", "err")
+            else:
+                # ADVANCED STRATEGY for Power, Mega, and LOTTO 6/36
+                try:
+                    real_names = {"power_645": "MEGA 6/45", "power_655": "POWER 6/55", "lotto": "LOTTO 6/36"}
+                    product_display = real_names.get(prod, prod.upper())
+                    res_box.insert(tk.END, f"🧬 CHIẾN THUẬT SIÊU CẤP {product_display}\n", "header")
+                    res_box.insert(tk.END, "------------------------------------------\n\n")
+                    all_nums = [n for t in tickets for n in t]
+                    hot_pool = [n for n, count in Counter(all_nums).most_common(12)]
+                    res_box.insert(tk.END, "🔥 1. DÀN SỐ VÀNG (Dành cho đánh BAO):\n", "header")
+                    res_box.insert(tk.END, f" 👉 Top 12 số: {', '.join([f'{n:02d}' for n in sorted(hot_pool)])}\n")
+                    res_box.insert(tk.END, f" 💡 HÀNH ĐỘNG: Dùng dàn này để đánh Bao hoặc chọn lọc vé lẻ.\n\n", "info")
+                    res_box.insert(tk.END, "📊 2. PHÂN TÍCH HÌNH THÁI VÉ:\n", "header")
+                    if prod == "lotto":
+                        heads = Counter([n // 10 for t in tickets for n in t])
+                        main_head = heads.most_common(1)[0][0]
+                        res_box.insert(tk.END, f" 👉 Đầu số mạnh: Đầu {main_head}x (Tần suất cao nhất)\n")
+                    even_counts = [sum(1 for n in t if n % 2 == 0) for t in tickets]
+                    best_even = Counter(even_counts).most_common(1)[0][0]
+                    res_box.insert(tk.END, f" 👉 Chẵn/Lẻ ưu tiên: {best_even} chẵn - {len(tickets[0])-best_even} lẻ\n")
+                    sums = [sum(t) for t in tickets]
+                    avg_s = int(sum(sums)/len(sums))
+                    res_box.insert(tk.END, f" 👉 Vùng Tổng kỳ vọng: {avg_s-10} đến {avg_s+10}\n\n")
+                    res_box.insert(tk.END, "🎯 3. GỢI Ý ĐẶT CƯỢC (Tổ hợp AI):\n", "header")
+                    for i, t in enumerate(tickets[:5]):
+                        t_str = " ".join([f"{int(n):02d}" for n in sorted(t)])
+                        if i == 0:
+                            res_box.insert(tk.END, f" ⭐ VÉ VIP #{i+1:02d} (Xác suất cao nhất): {t_str}\n", "success")
+                        else:
+                            res_box.insert(tk.END, f" #{i+1:02d}: {t_str}\n")
+                except Exception as e:
+                    self.log_to_terminal(f"⚠️ Logic Error Strategy: {str(e)}", "err")
+                    res_box.insert(tk.END, f"💎 DỰ BÁO KỲ TỚI ({prod.upper()}):\n\n", "header")
+                    for i, t in enumerate(tickets):
+                        t_str = " ".join([f"{int(n):02d}" for n in sorted(t)]) if isinstance(t, list) else str(t)
+                        res_box.insert(tk.END, f" #{i+1:02d}: {t_str}\n")
+            
+            res_box.config(state="disabled")
+        except Exception as e:
+            self.log_to_terminal(f"❌ UI Update Critical Error: {str(e)}", "err")
 
     def start_auto_schedule_thread(self):
         def _loop():
@@ -877,7 +1292,6 @@ class VietlottGUI:
                 except Exception as e:
                     print(f"Auto Schedule Error: {e}")
                     time.sleep(60)
-        
         threading.Thread(target=_loop, daemon=True).start()
 
     def start_auto_pilot_thread(self):
@@ -1144,11 +1558,15 @@ class VietlottGUI:
 
     def run_ultra_prediction(self):
         """Chạy module Ultra Predictor v2.0 - Thuật toán siêu cấp"""
+        if not self.is_licensed:
+            messagebox.showwarning("Bản quyền", "Tính năng ULTRA PREDICTOR chỉ dành cho phiên bản PRO.")
+            self.show_activation_dialog()
+            return
         
         # Ask for product type
         dialog = tk.Toplevel(self.root)
         dialog.title("ULTRA PREDICTOR v2.0")
-        dialog.geometry("350x220")
+        dialog.geometry("350x260")
         dialog.configure(bg="#0d0d2b")
         dialog.transient(self.root)
         dialog.grab_set()
@@ -1174,6 +1592,7 @@ class VietlottGUI:
         
         ttk.Button(dialog, text="🔴 Mega 6/45 (ULTRA)", command=lambda: set_choice("power_645")).pack(fill="x", padx=30, pady=3)
         ttk.Button(dialog, text="🟠 Power 6/55 (ULTRA)", command=lambda: set_choice("power_655")).pack(fill="x", padx=30, pady=3)
+        ttk.Button(dialog, text="🟢 Lotto 6/36 (ULTRA)", command=lambda: set_choice("lotto")).pack(fill="x", padx=30, pady=3)
         
         tk.Checkbutton(dialog, text="Sử dụng AI Ensemble (chờ 2-3 phút)", variable=mode_var, fg="#ccc", bg="#0d0d2b", selectcolor="#1a1a3a", font=("Arial", 9)).pack(pady=5)
         
@@ -1191,8 +1610,9 @@ class VietlottGUI:
                     data = json.load(f)
                 p_list = [e for e in data if e['product'] == selected_prod or e['product'] == selected_prod.replace("_","")]
                 if p_list and not p_list[-1].get('checked', False):
-                    prod_name = "Mega 6/45" if "645" in selected_prod else "Power 6/55"
-                    msg = f"⚠️ Đã có dự đoán cho {prod_name} chưa được kiểm tra!\n\n"
+                    _prod_map = {"power_645": "Mega 6/45", "power_655": "Power 6/55", "lotto": "Lotto 6/36"}
+                    prod_name_warn = _prod_map.get(selected_prod, selected_prod.upper())
+                    msg = f"⚠️ Đã có dự đoán cho {prod_name_warn} chưa được kiểm tra!\n\n"
                     msg += "Vui lòng: Cập nhật dữ liệu → Kiểm tra dự đoán → Rồi soi tiếp!"
                     messagebox.showwarning("Chưa kiểm tra dự đoán cũ!", msg)
                     return
@@ -1202,7 +1622,8 @@ class VietlottGUI:
         # Run Ultra Prediction
         self.btn_ultra.config(state="disabled")
         use_ai = mode_var.get()
-        prod_name = "Mega 6/45" if "645" in selected_prod else "Power 6/55"
+        _prod_name_map = {"power_645": "Mega 6/45", "power_655": "Power 6/55", "lotto": "Lotto 6/36"}
+        prod_name = _prod_name_map.get(selected_prod, selected_prod.upper())
         mode_str = "AI Ensemble" if use_ai else "Thống kê nhanh"
         self.status_var.set(f"🏆 ULTRA: Đang phân tích {prod_name} ({mode_str})...")
         
@@ -1391,7 +1812,7 @@ class VietlottGUI:
         top.geometry("700x500")
         top.configure(bg="#1a1a1a")
         
-        txt = tk.Text(top, font=("Consolas", 10), bg="#000", fg="#00ff88", padx=10, pady=10)
+        txt = tk.Text(top, font=("Consolas", 10), bg="#000", fg="#00ff88", padx=10, pady=10, wrap="none")
         txt.pack(fill="both", expand=True)
         
         try:
@@ -1441,6 +1862,10 @@ class VietlottGUI:
     # --- ENHANCED PREDICTION METHODS ---
     # --- ENHANCED PREDICTION METHODS ---
     def predict_keno(self):
+        if not self.is_licensed:
+            messagebox.showwarning("Bản quyền", "Tính năng SOI CẦU KENO chỉ dành cho phiên bản PRO.")
+            self.show_activation_dialog()
+            return
         btn = getattr(self, "btn_keno", None)
         if btn: btn.config(state="disabled")
         self.status_var.set("🤖 Đang tính toán Keno RE Bias...")
@@ -1448,16 +1873,10 @@ class VietlottGUI:
 
     def _run_keno(self):
         try:
-            from keno_predictor import get_current_time_slot, get_hot_numbers_by_slot
-            import random
+            from keno_predictor import generate_keno_prediction, get_current_time_slot
             
             slot_key, slot_name = get_current_time_slot()
-            hot_nums = get_hot_numbers_by_slot(slot_key)
-            
-            tickets = []
-            for _ in range(3):
-                t = sorted(hot_nums[:6] + random.sample(hot_nums[6:20], 4))
-                tickets.append(t)
+            tickets = generate_keno_prediction(count=3)
             
             p_str = " ".join([f"{n:02d}" for n in tickets[0]])
             self._save_custom_log("keno", tickets, p_str, f"RE Time Bias ({slot_key})")
@@ -1479,6 +1898,7 @@ class VietlottGUI:
 
             self.root.after(0, _up)
         except Exception as e:
+            self.log_to_terminal(f"Keno Error: {e}", "err")
             btn = getattr(self, "btn_keno", None)
             if btn: self.root.after(0, lambda: btn.config(state="normal"))
 
@@ -1521,6 +1941,10 @@ class VietlottGUI:
         self.predict_max3d()
 
     def predict_bingo(self):
+        if not self.is_licensed:
+            messagebox.showwarning("Bản quyền", "Tính năng SOI CẦU BINGO 18 chỉ dành cho phiên bản PRO.")
+            self.show_activation_dialog()
+            return
         btn = getattr(self, "btn_bingo18", None)
         if btn: btn.config(state="disabled")
         self.status_var.set("🤖 Đang phân tích Bingo18...")
@@ -1653,7 +2077,7 @@ class VietlottGUI:
                     top.geometry("700x500")
                     top.configure(bg="#0a0a1a")
                     
-                    st = scrolledtext.ScrolledText(top, bg="#000", fg="#00ff88", font=("Consolas", 10))
+                    st = scrolledtext.ScrolledText(top, bg="#000", fg="#00ff88", font=("Consolas", 10), wrap="none")
                     st.pack(fill="both", expand=True, padx=10, pady=10)
                     st.insert(tk.END, report)
                     st.config(state="disabled")
@@ -1673,4 +2097,3 @@ if __name__ == "__main__":
         windll.shcore.SetProcessDpiAwareness(1)
     except: pass
     app = VietlottGUI(root); root.mainloop()
-
