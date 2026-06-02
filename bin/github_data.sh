@@ -19,11 +19,12 @@ sleep $RANDOM_DELAY
 
 # CRAWL DATA
 # Chạy crawler để lấy dữ liệu mới nhất
+# Dùng || true để không dừng nếu bị Cloudflare block
 echo "Starting crawler..."
-python src/vietlott/cli/crawl.py power_655
-python src/vietlott/cli/missing.py power_655
-python src/vietlott/cli/crawl.py power_645
-python src/vietlott/cli/missing.py power_645
+python src/vietlott/cli/crawl.py power_655 || echo "WARNING: power_655 crawl failed"
+python src/vietlott/cli/missing.py power_655 || echo "WARNING: power_655 missing check failed"
+python src/vietlott/cli/crawl.py power_645 || echo "WARNING: power_645 crawl failed"
+python src/vietlott/cli/missing.py power_645 || echo "WARNING: power_645 missing check failed"
 
 # RENDER
 # Cập nhật thông tin trong README (nếu có script)
@@ -34,7 +35,9 @@ python src/vietlott/cli/missing.py power_645
 git config user.name "$USER"
 git config user.email "$EMAIL"
 git status
-git add data/*.jsonl
+git add data/*.jsonl 2>/dev/null || true
 # git add readme.md
-git commit -m "auto: update daily data @ $(date +%Y-%m-%d)"
-git push
+git diff --cached --quiet && echo "No changes to commit" || {
+  git commit -m "auto: update daily data @ $(date +%Y-%m-%d)"
+  git push
+}

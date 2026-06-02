@@ -1,4 +1,5 @@
 import math
+import os
 
 import click
 import pandas as pd
@@ -36,6 +37,17 @@ def detect_missing_data(ctx, product, limit):
     click.echo(f"product={product}, limit={limit}")
 
     product_cfg: ProductConfig = product_config_map[product]
+
+    if not os.path.exists(product_cfg.raw_path):
+        click.echo(f"Warning: Data file not found: {product_cfg.raw_path}. Run crawl first.")
+        ctx.exit(0)
+        return
+
+    if os.path.getsize(product_cfg.raw_path) == 0:
+        click.echo(f"Warning: Data file is empty: {product_cfg.raw_path}. Run crawl first.")
+        ctx.exit(0)
+        return
+
     df = pd.read_json(product_cfg.raw_path, lines=True)
     #print(df["id"].dtype)
     if df["id"].dtype == "object":
